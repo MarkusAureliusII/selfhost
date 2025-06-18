@@ -1,0 +1,656 @@
+
+volumes:
+  n8n_storage:
+  n8n_binary_data:
+  postgres_storage:
+  ollama_storage:
+  open_webui_data:
+  # Supabase Volumes
+  supabase_db_storage:
+  supabase_storage_data:
+  # Zusätzliche Volumes für erweiterte Funktionen
+  monitoring_storage:
+  backup_storage:
+
+networks:
+  demo:
+    driver: bridge
+  web:
+    external: true
+
+x-n8n: &service-n8n
+  image: n8nio/n8n:latest
+  networks: 
+    - demo
+  environment:
+    - DB_TYPE=postgresdb
+    - DB_POSTGRESDB_HOST=postgres
+    - DB_POSTGRESDB_USER=${POSTGRES_USER}
+    - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+    - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+    - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_USER_MANAGEMENT_JWT_SECRET}
+    
+    # HTTP/IP Einstellungen (ohne Domain/HTTPS)
+    - N8N_SECURE_COOKIE=false
+    - N8N_HOST=0.0.0.0
+    - N8N_PROTOCOL=http
+    - N8N_PORT=5678
+    - WEBHOOK_URL=http://217.154.225.184:5678
+    - N8N_PROXY_HOPS=1
+    - N8N_TRUSTED_PROXY_IPS=["0.0.0.0/0"]
+    - N8N_DISABLE_UI=false
+    
+    # High-Performance Konfiguration für 24GB RAM
+    - N8N_PAYLOAD_SIZE_MAX=32
+    - N8N_CONCURRENCY_LIMIT=50
+    - N8N_DEFAULT_BINARY_DATA_MODE=filesystem
+    - N8N_BINARY_DATA_STORAGE_PATH=/data/shared/files
+    - N8N_WORKERS_AUTO_FIX_TIMEOUT=300
+    - N8N_EXECUTIONS_DATA_MAX_AGE=336
+    
+    # Quality of Life
+    - N8N_RUNNERS_ENABLED=true
+    - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+    - N8N_PERSONALIZATION_ENABLED=false
+    - N8N_DIAGNOSTICS_ENABLED=false
+    - N8N_HIRING_BANNER_ENABLED=false
+    - GENERIC_TIMEZONE=Europe/Berlin
+    - N8N_METRICS_INCLUDE_API_ENDPOINTS=true
+    # Authentication enabled
+    - N8N_USER_MANAGEMENT_DISABLED=false
+    - N8N_BASIC_AUTH_ACTIVE=false
+    
+    # Dark Mode als Standard
+    - N8N_TEMPLATES_ENABLED=true
+    - N8N_TEMPLATES_HOST=https://api.n8n.io
+    - N8N_USER_FOLDER=/home/node/.n8n
+    - N8N_DEFAULT_THEME=dark
+    
+    # Ollama Integration
+    - OLLAMA_HOST=ollama:11434
+    
+    # Supabase Integration for N8N
+    - SUPABASE_URL=http://supabase-kong:8000
+    - SUPABASE_REST_URL=http://supabase-kong:8000/rest/v1/
+    - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    - SUPABASE_DB_HOST=supabase-db
+    - SUPABASE_DB_PORT=5432
+    - SUPABASE_DB_NAME=postgres
+    - SUPABASE_DB_USER=authenticator
+    - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
+  env_file:
+    - .env
+  restart: unless-stopped
+  # Flexible Ressourcen - 24GB RAM System
+  mem_reservation: 1g    # Garantiert 1GB minimum, kann bis zu 10GB+ nutzen
+  # Kein mem_limit - kann bei Bedarf mehr RAM nutzen
+  # Kein cpus-limit - kann alle 6 CPU-Kerne nutzen
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    networks: [demo]
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # PostgreSQL Optimierungen für 24GB RAM System
+      - POSTGRES_SHARED_BUFFERS=6GB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=18GB
+      - POSTGRES_WORK_MEM=16MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=2GB
+      - POSTGRES_MAX_CONNECTIONS=200
+      - POSTGRES_MAX_WORKER_PROCESSES=6
+      - POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER=3
+      - POSTGRES_MAX_PARALLEL_WORKERS=6
+    volumes:
+      - postgres_storage:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Flexible Ressourcen
+    mem_limit: 8g          # Sicherheitslimit für DB
+    mem_reservation: 2g    # Garantiert 2GB für DB-Operations
+    # CPU wird dynamisch geteilt
+
+  n8n:
+    <<: *service-n8n
+    hostname: n8n
+    container_name: n8n
+    networks:
+      - demo
+      - web
+    ports:
+      - "5678:5678"  # Direkter Zugriff über IP:5678
+    volumes:
+      - n8n_storage:/home/node/.n8n
+      - n8n_binary_data:/data/shared/files
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`217.154.225.184`) && PathPrefix(`/automation`)"
+      - "traefik.http.routers.n8n.tls=false"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+      - "traefik.http.middlewares.n8n-stripprefix.stripprefix.prefixes=/automation"
+      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix"
+
+  # Supabase Self-Hosted - Komplettes Setup mit Interface + Webhooks + API
+  supabase-db:
+    image: pgvector/pgvector:pg15
+    hostname: supabase-db
+    container_name: supabase-db
+    networks: 
+      - demo
+    restart: unless-stopped
+    ports:
+      - "5432:5432"  # PostgreSQL direkt verfügbar
+    environment:
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
+    volumes:
+      - supabase_db_storage:/var/lib/postgresql/data
+      - ./config/supabase/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # Performance für AI Workloads
+    mem_reservation: 2g
+    mem_limit: 8g
+    command: >
+      postgres -c max_connections=200
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c log_min_messages=fatal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  supabase-studio:
+    image: supabase/studio:latest
+    hostname: supabase-studio
+    container_name: supabase-studio
+    networks:
+      - demo
+      - web
+    restart: unless-stopped
+    ports:
+      - "6333:3000"  # Supabase Studio Interface (gleicher Port wie Qdrant)
+    environment:
+      - STUDIO_PG_META_URL=http://supabase-meta:8080
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DEFAULT_ORGANIZATION_NAME=AI Stack
+      - DEFAULT_PROJECT_NAME=AI Stack Database
+      - SUPABASE_PUBLIC_URL=http://217.154.225.184:6333
+      - SUPABASE_URL=http://217.154.225.184:8000
+      - SUPABASE_REST_URL=http://217.154.225.184:8000/rest/v1/
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - LOGFLARE_API_KEY=${LOGFLARE_API_KEY:-stub}
+      - LOGFLARE_URL=http://supabase-analytics:4000
+      - NEXT_PUBLIC_ENABLE_LOGS=true
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-meta:
+        condition: service_started
+    mem_reservation: 512m
+    mem_limit: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.supabase.rule=Host(`217.154.225.184`) && PathPrefix(`/database`)"
+      - "traefik.http.routers.supabase.tls=false"
+      - "traefik.http.services.supabase.loadbalancer.server.port=3000"
+
+  supabase-kong:
+    image: kong:2.8.1
+    hostname: supabase-kong
+    container_name: supabase-kong
+    networks:
+      - demo
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # Supabase API Gateway
+      - "8443:8443"  # HTTPS API Gateway
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/var/lib/kong/kong.yml
+      - KONG_DNS_ORDER=LAST,A,CNAME
+      - KONG_PLUGINS=request-id,kong-upstream-jwt,cors
+      - KONG_LOG_LEVEL=info
+    volumes:
+      - ./config/supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+    mem_limit: 1g
+
+  supabase-auth:
+    image: supabase/gotrue:v2.132.3
+    hostname: supabase-auth
+    container_name: supabase-auth
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - GOTRUE_API_HOST=0.0.0.0
+      - GOTRUE_API_PORT=9999
+      - API_EXTERNAL_URL=http://217.154.225.184:8000
+      - GOTRUE_DB_DRIVER=postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - GOTRUE_SITE_URL=http://217.154.225.184:6333
+      - GOTRUE_URI_ALLOW_LIST=http://217.154.225.184:3000,http://217.154.225.184:3001,http://217.154.225.184:5678,http://217.154.225.184:6333,http://217.154.225.184:8000
+      - GOTRUE_DISABLE_SIGNUP=false
+      - GOTRUE_JWT_ADMIN_ROLES=service_role
+      - GOTRUE_JWT_AUD=authenticated
+      - GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated
+      - GOTRUE_JWT_EXP=3600
+      - GOTRUE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - GOTRUE_EXTERNAL_EMAIL_ENABLED=true
+      - GOTRUE_MAILER_AUTOCONFIRM=true
+      - GOTRUE_SMTP_ADMIN_EMAIL=admin@aistack.local
+      - GOTRUE_SMTP_HOST=${SMTP_HOST:-localhost}
+      - GOTRUE_SMTP_PORT=${SMTP_PORT:-1025}
+      - GOTRUE_SMTP_USER=${SMTP_USER:-}
+      - GOTRUE_SMTP_PASS=${SMTP_PASS:-}
+      - GOTRUE_SMTP_SENDER_NAME=AI Stack
+      - GOTRUE_MAILER_URLPATHS_INVITE=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_CONFIRMATION=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_RECOVERY=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE=/auth/v1/verify
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-rest:
+    image: postgrest/postgrest:v12.0.1
+    hostname: supabase-rest
+    container_name: supabase-rest
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PGRST_DB_URI=postgres://authenticator:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - PGRST_DB_SCHEMAS=public,storage,graphql_public
+      - PGRST_DB_ANON_ROLE=anon
+      - PGRST_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - PGRST_DB_USE_LEGACY_GUCS=false
+      - PGRST_APP_SETTINGS_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - PGRST_APP_SETTINGS_JWT_EXP=3600
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-realtime:
+    image: supabase/realtime:v2.25.50
+    hostname: supabase-realtime
+    container_name: supabase-realtime
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PORT=4000
+      - DB_HOST=supabase-db
+      - DB_PORT=5432
+      - DB_USER=supabase_realtime_admin
+      - DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DB_NAME=postgres
+      - DB_AFTER_CONNECT_QUERY=SET search_path TO _realtime
+      - DB_ENC_KEY=supabaserealtimedevenc
+      - API_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - FLY_ALLOC_ID=fly123
+      - FLY_APP_NAME=realtime
+      - SECRET_KEY_BASE=${SUPABASE_SECRET_KEY_BASE}
+      - ERL_AFLAGS=-proto_dist inet_tcp
+      - ENABLE_TAILSCALE=false
+      - DNS_NODES='finder@supabase-realtime'
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-meta:
+    image: supabase/postgres-meta:v0.68.0
+    hostname: supabase-meta
+    container_name: supabase-meta
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PG_META_PORT=8080
+      - PG_META_DB_HOST=supabase-db
+      - PG_META_DB_PORT=5432
+      - PG_META_DB_NAME=postgres
+      - PG_META_DB_USER=supabase_admin
+      - PG_META_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-storage:
+    image: supabase/storage-api:v0.40.4
+    hostname: supabase-storage
+    container_name: supabase-storage
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - ANON_KEY=${SUPABASE_ANON_KEY}
+      - SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - POSTGREST_URL=http://supabase-rest:3000
+      - PGRST_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - DATABASE_URL=postgres://supabase_storage_admin:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - FILE_SIZE_LIMIT=52428800
+      - STORAGE_BACKEND=file
+      - FILE_STORAGE_BACKEND_PATH=/var/lib/storage
+      - TENANT_ID=stub
+      - REGION=stub
+      - GLOBAL_S3_BUCKET=stub
+      - ENABLE_IMAGE_TRANSFORMATION=true
+      - IMGPROXY_URL=http://supabase-imgproxy:5001
+    volumes:
+      - supabase_storage_data:/var/lib/storage
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-rest:
+        condition: service_started
+    mem_reservation: 256m
+
+  supabase-imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    hostname: supabase-imgproxy
+    container_name: supabase-imgproxy
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - IMGPROXY_BIND=0.0.0.0:5001
+      - IMGPROXY_LOCAL_FILESYSTEM_ROOT=/
+      - IMGPROXY_USE_ETAG=true
+      - IMGPROXY_ENABLE_WEBP_DETECTION=true
+    volumes:
+      - supabase_storage_data:/var/lib/storage:ro
+    mem_reservation: 128m
+
+  supabase-edge-functions:
+    image: supabase/edge-runtime:v1.8.2
+    hostname: supabase-edge-functions
+    container_name: supabase-edge-functions
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - SUPABASE_URL=http://supabase-kong:8000
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./config/supabase/functions:/home/deno/functions:ro
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  # Analytics für Logs (optional aber hilfreich für Webhooks)
+  supabase-analytics:
+    image: supabase/logflare:1.4.0
+    hostname: supabase-analytics
+    container_name: supabase-analytics
+    networks:
+      - demo
+    restart: unless-stopped
+    ports:
+      - "4000:4000"  # Analytics Interface
+    environment:
+      - DB_USERNAME=supabase_admin
+      - DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DB_DATABASE=postgres
+      - DB_HOSTNAME=supabase-db
+      - DB_PORT=5432
+      - LOGFLARE_NODE_HOST=localhost
+      - RELEASE_COOKIE=cookie
+      - SECRET_KEY_BASE=${SUPABASE_SECRET_KEY_BASE}
+      - LOGFLARE_API_KEY=${LOGFLARE_API_KEY:-stub}
+      - SINGLE_TENANT=true
+      - SUPABASE_MODE=true
+      - LOGFLARE_SUPABASE_MODE=true
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    hostname: ollama
+    networks: [demo]
+    restart: unless-stopped
+    ports:
+      - "11434:11434"  # Direkter Zugriff über IP:11434
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=*
+      # High-End Performance für 24GB RAM / 6 CPU
+      - OLLAMA_MAX_LOADED_MODELS=4
+      - OLLAMA_NUM_PARALLEL=6
+      - OLLAMA_KEEP_ALIVE=30m
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_MAX_QUEUE=50
+    volumes:
+      - ollama_storage:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
+    # Flexible Ressourcen - Hauptverbraucher
+    mem_reservation: 6g    # Garantiert 6GB, kann bis zu 20GB+ für große Modelle nutzen
+    # Kein mem_limit - kann bei großen Modellen fast allen RAM nutzen
+    # Kein cpus-limit - kann alle 6 CPU-Kerne für Inferenz nutzen
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama.rule=Host(`217.154.225.184`) && PathPrefix(`/llm-api`)"
+      - "traefik.http.routers.ollama.tls=false"
+      - "traefik.http.services.ollama.loadbalancer.server.port=11434"
+
+  ollama-setup:
+    image: ollama/ollama:latest
+    networks: [demo]
+    container_name: ollama-setup
+    volumes:
+      - ollama_storage:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - |
+        sleep 30
+        # Basis-Modelle (klein und effizient)
+        OLLAMA_HOST=ollama:11434 ollama pull llama3.2:3b
+        OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text:latest
+        
+        # Wichtige LLM-Modelle optimiert für RAM-Effizienz
+        OLLAMA_HOST=ollama:11434 ollama pull llama3.1:8b
+        OLLAMA_HOST=ollama:11434 ollama pull codellama:13b
+        OLLAMA_HOST=ollama:11434 ollama pull mixtral:8x7b
+        OLLAMA_HOST=ollama:11434 ollama pull mistral:7b
+        OLLAMA_HOST=ollama:11434 ollama pull phi3:14b
+        OLLAMA_HOST=ollama:11434 ollama pull neural-chat:7b
+        OLLAMA_HOST=ollama:11434 ollama pull gemma2:9b
+        OLLAMA_HOST=ollama:11434 ollama pull gemma2:2b
+        OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:14b
+        OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:3b
+        OLLAMA_HOST=ollama:11434 ollama pull deepseek-coder:6.7b
+        OLLAMA_HOST=ollama:11434 ollama pull llama3.2-vision:11b
+        
+        echo "Models downloaded successfully"
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  # Open WebUI - Deutsche ChatGPT-ähnliche Oberfläche für Ollama
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    hostname: open-webui
+    networks: 
+      - demo
+    restart: unless-stopped
+    ports:
+      - "3001:8080"  # WebUI über IP:3001
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-secret-key-change-me}
+      - DEFAULT_LOCALE=en-US
+      - DEFAULT_MODELS=llama3.2:3b,mistral:7b,codellama:13b
+      - ENABLE_SIGNUP=true
+      - ENABLE_LOGIN_FORM=true
+      - WEBUI_AUTH=false
+      - WEBUI_NAME="AI Chat"
+      - WEBUI_URL=http://217.154.225.184:3001
+      - DEFAULT_USER_ROLE=admin
+      # Dark Mode als Standard
+      - DEFAULT_THEME=dark
+      - THEME_COLOR=#1e293b
+      # Modell-Beschreibungen für bessere Auswahl
+      - >-
+        MODELS_LIST=[
+          {"name":"llama3.1:8b","description":"🚀 Premium LLM - Sehr gute Balance aus Leistung und Effizienz, 8B Parameter"},
+          {"name":"codellama:13b","description":"💻 Code-Spezialist - Programmierung, Debugging, Code-Reviews, 13B Parameter"},
+          {"name":"mixtral:8x7b","description":"🧠 Mixture of Experts - Vielseitig, mehrsprachig, effizient, 8x7B Parameter"},
+          {"name":"llama3.2-vision:11b","description":"👁️ Multimodal - Text + Bilder verstehen und analysieren, 11B Parameter"},
+          {"name":"deepseek-coder:6.7b","description":"🔧 DeepSeek Coder - Spezialisiert auf Code-Generierung, 6.7B Parameter"},
+          {"name":"qwen2.5:14b","description":"🌟 Qwen2.5 - Ausgewogenes Allround-Modell, mehrsprachig, 14B Parameter"},
+          {"name":"qwen2.5:3b","description":"🏎️ Qwen2.5 Compact - Sehr schnell mit guter Qualität, 3B Parameter"},
+          {"name":"gemma2:9b","description":"📚 Google Gemma2 - Factual, präzise Antworten, 9B Parameter"},
+          {"name":"gemma2:2b","description":"⚡ Google Gemma2 Mini - Ultra-effizient, nur 2.5GB RAM, 2B Parameter"},
+          {"name":"phi3:14b","description":"🎯 Microsoft Phi3 - Kompakt aber leistungsstark, 14B Parameter"},
+          {"name":"neural-chat:7b","description":"💬 Neural Chat - Optimiert für Unterhaltungen, 7B Parameter"},
+          {"name":"mistral:7b","description":"⚡ Mistral - Schnell und effizient für alltägliche Aufgaben, 7B Parameter"},
+          {"name":"llama3.2:3b","description":"🏃 Ultra-schnell - Minimale Latenz für einfache Fragen, 3B Parameter"},
+          {"name":"nomic-embed-text:latest","description":"🔍 Embedding-Modell - Für Textsuche und Ähnlichkeitsvergleiche"}
+        ]
+    volumes:
+      - open_webui_data:/app/backend/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+    # Flexible Ressourcen
+    mem_reservation: 512m
+    mem_limit: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openwebui.rule=Host(`217.154.225.184`) && PathPrefix(`/chat`)"
+      - "traefik.http.routers.openwebui.tls=false"
+      - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
+
+  # VPS Dashboard - Hauptübersicht aller Services  
+  dashboard:
+    build: ./dashboard
+    container_name: vps-dashboard
+    hostname: dashboard
+    networks: 
+      - demo
+      - web
+    restart: unless-stopped
+    ports:
+      - "3000:80"  # Dashboard über IP:3000
+    volumes:
+      - ./dashboard:/var/www/html:rw
+      - ./themes:/var/www/html/themes:ro
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    # Minimal resources
+    mem_reservation: 128m
+    mem_limit: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`217.154.225.184`) && PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.dashboard.tls=false"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=80"
+
+  # Optional: Monitoring Stack für Ressourcen-Überwachung
+  # Auskommentiert - bei Bedarf aktivieren
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus
+  #   hostname: prometheus
+  #   networks: [demo, web]
+  #   restart: unless-stopped
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - monitoring_storage:/prometheus
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+  #     - '--web.console.templates=/usr/share/prometheus/consoles'
+  #     - '--web.enable-lifecycle'
+  #   mem_reservation: 512m
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.prometheus.rule=Host(`prometheus.avantera-digital.de`)"
+  #     - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+  #     - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana
+  #   hostname: grafana
+  #   networks: [demo, web]
+  #   restart: unless-stopped
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   volumes:
+  #     - monitoring_storage:/var/lib/grafana
+  #   mem_reservation: 256m
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.grafana.rule=Host(`grafana.avantera-digital.de`)"
+  #     - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+  #     - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  # Automatisierte Backups
+  # backup:
+  #   image: postgres:16-alpine
+  #   container_name: backup-service
+  #   networks: [demo]
+  #   restart: "no"
+  #   volumes:
+  #     - backup_storage:/backup
+  #     - postgres_storage:/var/lib/postgresql/data:ro
+  #     - n8n_storage:/n8n_backup:ro
+  #     - qdrant_storage:/qdrant_backup:ro
+  #     - ollama_storage:/ollama_backup:ro
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #     - BACKUP_RETENTION_DAYS=30
+  #   command: >
+  #     bash -c "
+  #       echo 'Starting backup process...'
+  #       pg_dump -h postgres -U ${POSTGRES_USER} -d ${POSTGRES_DB} | 
+  #       gzip > /backup/postgres_$$(date +%Y%m%d_%H%M%S).sql.gz
+  #       tar -czf /backup/n8n_workflows_$$(date +%Y%m%d_%H%M%S).tar.gz /n8n_backup
+  #       tar -czf /backup/qdrant_vectors_$$(date +%Y%m%d_%H%M%S).tar.gz /qdrant_backup
+  #       find /backup -name '*.gz' -mtime +30 -delete
+  #       echo 'Backup completed successfully'
+  #     "

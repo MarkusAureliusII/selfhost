@@ -231,10 +231,39 @@ services:
 ### API Key Authentication
 ###
 plugins:
-  - name: request-id
+  - name: cors
     config:
-      header_name: X-Request-ID
-      echo_downstream: true
+      origins:
+        - "https://loveable.dev"
+        - "https://*.loveable.dev"
+        - "http://localhost:3000"
+        - "http://localhost:5173"
+        - "https://avantera-digital.de"
+        - "https://*.avantera-digital.de"
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Accept
+        - Accept-Language
+        - Content-Language
+        - Content-Type
+        - Authorization
+        - Cache-Control
+        - X-Client-Info
+        - apikey
+        - Prefer
+        - Range
+      exposed_headers:
+        - Content-Length
+        - Content-Type
+        - Content-Range
+      credentials: true
+      max_age: 3600
   - name: key-auth
     service: auth-v1
     config:

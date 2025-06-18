@@ -1,0 +1,6 @@
+[2025-06-18 20:09:00] Available N8N backups:
+[2025-06-18 20:09:04] Verifying backup integrity for timestamp: 20250618_200837
+[2025-06-18 20:09:04] [0;32mSUCCESS: N8N storage backup verified[0m
+[2025-06-18 20:09:04] [0;32mSUCCESS: N8N binary backup verified[0m
+[2025-06-18 20:09:04] [0;32mSUCCESS: PostgreSQL backup verified[0m
+[2025-06-18 20:09:04] [0;32mSUCCESS: All backup files verified successfully[0m

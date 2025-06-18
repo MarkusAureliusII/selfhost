@@ -218,6 +218,7 @@ services:
     container_name: supabase-kong
     networks:
       - demo
+      - web
     restart: unless-stopped
     ports:
       - "8000:8000"  # Supabase API Gateway
@@ -226,7 +227,7 @@ services:
       - KONG_DATABASE=off
       - KONG_DECLARATIVE_CONFIG=/var/lib/kong/kong.yml
       - KONG_DNS_ORDER=LAST,A,CNAME
-      - KONG_PLUGINS=request-id,kong-upstream-jwt,cors
+      - KONG_PLUGINS=cors
       - KONG_LOG_LEVEL=info
     volumes:
       - ./config/supabase/kong.yml:/var/lib/kong/kong.yml:ro
@@ -235,6 +236,12 @@ services:
         condition: service_healthy
     mem_reservation: 256m
     mem_limit: 1g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.supabase-api.rule=Host(`supabase.avantera-digital.de`)"
+      - "traefik.http.routers.supabase-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.supabase-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.supabase-api.middlewares=cors-headers"
 
   supabase-auth:
     image: supabase/gotrue:v2.132.3

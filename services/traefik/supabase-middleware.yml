@@ -1,0 +1,33 @@
+http:
+  middlewares:
+    cors-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowOriginList:
+          - "https://loveable.dev"
+          - "https://*.loveable.dev"
+          - "http://localhost:3000"
+          - "http://localhost:5173"
+          - "http://localhost:8080"
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+          - "apikey"
+          - "X-Client-Info"
+          - "Prefer"
+          - "Range"
+        accessControlAllowCredentials: true
+        accessControlMaxAge: 3600
+        addVaryHeader: true
+    
+    supabase-auth:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+          X-Forwarded-Host: "supabase.avantera-digital.de"

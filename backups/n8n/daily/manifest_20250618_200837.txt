@@ -1,0 +1,17 @@
+N8N Backup Manifest
+Created: Wed Jun 18 20:08:45 UTC 2025
+Timestamp: 20250618_200837
+
+Contents:
+- workflows_20250618_200837/ (API exports)
+- n8n_storage_20250618_200837.tar.gz (N8N application data)
+- n8n_binary_20250618_200837.tar.gz (N8N binary files)
+- postgres_n8n_20250618_200837.sql.gz (Database dump)
+- config_20250618_200837/ (Configuration files)
+
+Docker Volumes:
+- selfhost_n8n_storage
+- selfhost_n8n_binary_data
+
+Database: n8n_db (PostgreSQL)
+N8N Version: 1.98.1

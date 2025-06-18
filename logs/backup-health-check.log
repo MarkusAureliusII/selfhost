@@ -1,0 +1,14 @@
+[2025-06-18 20:09:17] Starting backup health check...
+[2025-06-18 20:09:17] Checking recent backups (last 3 days)...
+[2025-06-18 20:09:17] Checking backup: 20250618_200837
+[2025-06-18 20:09:18] [0;32mSUCCESS: Storage backup OK: 20250618_200837[0m
+[2025-06-18 20:09:18] [0;32mSUCCESS: Database backup OK: 20250618_200837[0m
+[2025-06-18 20:09:18] Backup statistics:
+[2025-06-18 20:09:18] - Recent backups found: 0
+[2025-06-18 20:09:18] - Corrupted backups: 0
+[2025-06-18 20:09:18] - Total backup size: 0GB
+[2025-06-18 20:09:18] - Available space: 237GB
+[2025-06-18 20:09:18] [0;32mSUCCESS: Recent backup found (within 24h)[0m
+[2025-06-18 20:09:18] [0;32mSUCCESS: N8N service is running[0m
+[2025-06-18 20:09:18] [0;32mSUCCESS: N8N API is accessible[0m
+[2025-06-18 20:09:18] [0;31mERROR: Backup health check issues found![0m

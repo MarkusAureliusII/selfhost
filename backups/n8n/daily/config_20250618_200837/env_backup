@@ -1,0 +1,37 @@
+# PostgreSQL Database Configuration
+POSTGRES_DB=n8n_db
+POSTGRES_USER=n8n_user
+POSTGRES_PASSWORD=n8n_secure_password_2024
+
+# N8N Configuration
+N8N_ENCRYPTION_KEY=n8n_encryption_key_secure_2024_random_string
+N8N_USER_MANAGEMENT_JWT_SECRET=n8n_jwt_secret_secure_2024_random_string
+
+# Open WebUI Configuration
+WEBUI_SECRET_KEY=openwebui_secret_key_secure_2024_random_string
+
+# Optional: Grafana Configuration (if monitoring enabled)
+GRAFANA_PASSWORD=grafana_admin_secure_2024
+
+# Domain Configuration (for HTTPS)
+DOMAIN=avantera-digital.de
+EMAIL=admin@avantera-digital.de
+
+# Let's Encrypt Settings
+ACME_EMAIL=admin@avantera-digital.de
+
+# Supabase Configuration
+SUPABASE_DB_PASSWORD=supabase_secure_db_2024
+SUPABASE_JWT_SECRET=supabase_jwt_secret_very_secure_2024_minimum_32_characters_required_for_security
+SUPABASE_SECRET_KEY_BASE=supabase_secret_key_base_very_secure_2024_minimum_64_characters_required_for_elixir_phoenix
+SUPABASE_ANON_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpLXN0YWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODQ4NjAyMDAsImV4cCI6MTg0MjY0NjYwMH0.LmAmqbkr_V-ZgPl4UQJf9z2Y2J9vF3nHdY1kF4M-4CQ
+SUPABASE_SERVICE_ROLE_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFpLXN0YWNrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4NDg2MDIwMCwiZXhwIjoxODQyNjQ2NjAwfQ.pJ7qQ4RvM5L8nGx3Hp9s6kF2J9vF3nHdY1kF4M-8Wy
+
+# Optional: SMTP Configuration for Supabase Auth
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Optional: Analytics Configuration
+LOGFLARE_API_KEY=your_logflare_api_key_here
