@@ -1,0 +1,35 @@
+# Vereinfachte Traefik-Konfiguration nur für Dashboard
+# Ohne HTTPS/SSL, nur HTTP auf Port 8080
+
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "8080:8080"  # Dashboard
+    networks:
+      - demo
+    command:
+      # API und Dashboard
+      - --api.dashboard=true
+      - --api.insecure=true  # HTTP Dashboard (einfacher)
+      
+      # Provider
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      
+      # Logging
+      - --log.level=INFO
+      - --accesslog=true
+      
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    
+    # Minimal resources
+    mem_limit: 256m
+    mem_reservation: 64m
+
+networks:
+  demo:
+    external: true

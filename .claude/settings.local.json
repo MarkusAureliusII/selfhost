@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker:*)",
+      "Bash(nproc)",
+      "Bash(chmod:*)",
+      "Bash(/var/www/selfhost/get-docker.sh)",
+      "Bash(systemctl:*)",
+      "Bash(/var/www/selfhost/setup-swap.sh)",
+      "Bash(mkdir:*)",
+      "Bash(/var/www/selfhost/check-services.sh:*)",
+      "Bash(mv:*)",
+      "Bash(ls:*)",
+      "Bash(sudo chown:*)",
+      "Bash(apt:*)"
+    ],
+    "deny": []
+  }
+}
