@@ -99,9 +99,10 @@
             'traefik': 'http://217.154.225.184:8080'
         };
         
-        // Apply theme immediately
-        const theme = localStorage.getItem('ai-theme') || 'light';
+        // Apply theme immediately - Default to dark
+        const theme = localStorage.getItem('ai-stack-theme') || 'dark';
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-ai-stack-theme', theme);
         
         // Load target application
         const frame = document.getElementById('appFrame');
@@ -145,8 +146,9 @@
         
         // Handle theme changes
         window.addEventListener('storage', (e) => {
-            if (e.key === 'ai-theme') {
+            if (e.key === 'ai-stack-theme') {
                 document.documentElement.setAttribute('data-theme', e.newValue);
+                document.documentElement.setAttribute('data-ai-stack-theme', e.newValue);
             }
         });
     </script>

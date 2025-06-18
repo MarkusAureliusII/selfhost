@@ -5,7 +5,7 @@ requireAuth(); // Require authentication to access dashboard
 $user = getCurrentUser();
 ?>
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -538,7 +538,7 @@ $user = getCurrentUser();
                         <span>Welcome, <?php echo htmlspecialchars($user['username']); ?></span>
                     </div>
                     <button class="theme-toggle" onclick="toggleTheme()">
-                        <span id="theme-icon">🌙</span>
+                        <span id="theme-icon">☀️</span>
                     </button>
                     <div class="status-indicator">
                         <div class="status-dot"></div>
@@ -746,7 +746,7 @@ $user = getCurrentUser();
 
         // Initialize theme from localStorage
         function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             const html = document.documentElement;
             const themeIcon = document.getElementById('theme-icon');
             

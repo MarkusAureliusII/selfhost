@@ -58,6 +58,12 @@ x-n8n: &service-n8n
     - N8N_USER_MANAGEMENT_DISABLED=false
     - N8N_BASIC_AUTH_ACTIVE=false
     
+    # Dark Mode als Standard
+    - N8N_TEMPLATES_ENABLED=true
+    - N8N_TEMPLATES_HOST=https://api.n8n.io
+    - N8N_USER_FOLDER=/home/node/.n8n
+    - N8N_DEFAULT_THEME=dark
+    
     # Ollama Integration
     - OLLAMA_HOST=ollama:11434
   env_file:
@@ -226,6 +232,9 @@ services:
       - WEBUI_NAME="AI Chat"
       - WEBUI_URL=http://217.154.225.184:3001
       - DEFAULT_USER_ROLE=admin
+      # Dark Mode als Standard
+      - DEFAULT_THEME=dark
+      - THEME_COLOR=#1e293b
       # Modell-Beschreibungen für bessere Auswahl
       - >-
         MODELS_LIST=[
