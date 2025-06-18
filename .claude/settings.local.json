@@ -15,7 +15,8 @@
       "Bash(apt:*)",
       "Bash(rm:*)",
       "Bash(curl:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(sudo file:*)"
     ],
     "deny": []
   }

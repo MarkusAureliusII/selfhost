@@ -186,16 +186,17 @@ services:
         OLLAMA_HOST=ollama:11434 ollama pull llama3.2:3b
         OLLAMA_HOST=ollama:11434 ollama pull nomic-embed-text:latest
         
-        # Alle wichtigen LLM-Modelle für 24GB RAM System
-        OLLAMA_HOST=ollama:11434 ollama pull llama3.1:70b
-        OLLAMA_HOST=ollama:11434 ollama pull codellama:34b
+        # Wichtige LLM-Modelle optimiert für RAM-Effizienz
+        OLLAMA_HOST=ollama:11434 ollama pull llama3.1:8b
         OLLAMA_HOST=ollama:11434 ollama pull codellama:13b
         OLLAMA_HOST=ollama:11434 ollama pull mixtral:8x7b
         OLLAMA_HOST=ollama:11434 ollama pull mistral:7b
         OLLAMA_HOST=ollama:11434 ollama pull phi3:14b
         OLLAMA_HOST=ollama:11434 ollama pull neural-chat:7b
         OLLAMA_HOST=ollama:11434 ollama pull gemma2:9b
+        OLLAMA_HOST=ollama:11434 ollama pull gemma2:2b
         OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:14b
+        OLLAMA_HOST=ollama:11434 ollama pull qwen2.5:3b
         OLLAMA_HOST=ollama:11434 ollama pull deepseek-coder:6.7b
         OLLAMA_HOST=ollama:11434 ollama pull llama3.2-vision:11b
         
@@ -225,6 +226,24 @@ services:
       - WEBUI_NAME="AI Chat"
       - WEBUI_URL=http://217.154.225.184:3001
       - DEFAULT_USER_ROLE=admin
+      # Modell-Beschreibungen für bessere Auswahl
+      - >-
+        MODELS_LIST=[
+          {"name":"llama3.1:8b","description":"🚀 Premium LLM - Sehr gute Balance aus Leistung und Effizienz, 8B Parameter"},
+          {"name":"codellama:13b","description":"💻 Code-Spezialist - Programmierung, Debugging, Code-Reviews, 13B Parameter"},
+          {"name":"mixtral:8x7b","description":"🧠 Mixture of Experts - Vielseitig, mehrsprachig, effizient, 8x7B Parameter"},
+          {"name":"llama3.2-vision:11b","description":"👁️ Multimodal - Text + Bilder verstehen und analysieren, 11B Parameter"},
+          {"name":"deepseek-coder:6.7b","description":"🔧 DeepSeek Coder - Spezialisiert auf Code-Generierung, 6.7B Parameter"},
+          {"name":"qwen2.5:14b","description":"🌟 Qwen2.5 - Ausgewogenes Allround-Modell, mehrsprachig, 14B Parameter"},
+          {"name":"qwen2.5:3b","description":"🏎️ Qwen2.5 Compact - Sehr schnell mit guter Qualität, 3B Parameter"},
+          {"name":"gemma2:9b","description":"📚 Google Gemma2 - Factual, präzise Antworten, 9B Parameter"},
+          {"name":"gemma2:2b","description":"⚡ Google Gemma2 Mini - Ultra-effizient, nur 2.5GB RAM, 2B Parameter"},
+          {"name":"phi3:14b","description":"🎯 Microsoft Phi3 - Kompakt aber leistungsstark, 14B Parameter"},
+          {"name":"neural-chat:7b","description":"💬 Neural Chat - Optimiert für Unterhaltungen, 7B Parameter"},
+          {"name":"mistral:7b","description":"⚡ Mistral - Schnell und effizient für alltägliche Aufgaben, 7B Parameter"},
+          {"name":"llama3.2:3b","description":"🏃 Ultra-schnell - Minimale Latenz für einfache Fragen, 3B Parameter"},
+          {"name":"nomic-embed-text:latest","description":"🔍 Embedding-Modell - Für Textsuche und Ähnlichkeitsvergleiche"}
+        ]
     volumes:
       - open_webui_data:/app/backend/data
     depends_on:
