@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stack Login</title>
+    <link rel="stylesheet" href="/themes/css/dark-theme.css">
+    <link rel="stylesheet" href="/themes/css/components.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            padding: var(--spacing-4);
+        }
+        
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-8);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+        }
+        
+        .logo-section {
+            text-align: center;
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border-radius: var(--radius-lg);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-4);
+        }
+        
+        .login-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .login-subtitle {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .form-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-3) var(--spacing-4);
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            color: var(--text-primary);
+            background-color: var(--tertiary-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-base);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: var(--spacing-4);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            color: white;
+            border: none;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .login-button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-sm);
+            background-color: var(--tertiary-bg);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .checkbox:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        
+        .checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checkbox-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--error-color);
+            padding: var(--spacing-3) var(--spacing-4);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--spacing-4);
+            font-size: var(--font-size-sm);
+        }
+        
+        .info-section {
+            text-align: center;
+            padding-top: var(--spacing-6);
+            border-top: 1px solid var(--border-primary);
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+        }
+        
+        .service-list {
+            margin-top: var(--spacing-4);
+        }
+        
+        .service-item {
+            display: inline-block;
+            background-color: var(--tertiary-bg);
+            color: var(--text-secondary);
+            padding: var(--spacing-1) var(--spacing-2);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            margin: var(--spacing-1);
+        }
+        
+        /* Loading animation */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-primary);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--spacing-2);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading .spinner {
+            display: inline-block;
+        }
+        
+        .loading-text {
+            display: none;
+        }
+        
+        .loading .loading-text {
+            display: inline;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: var(--spacing-6);
+                margin: var(--spacing-4);
+            }
+            
+            .logo-icon {
+                width: 48px;
+                height: 48px;
+                font-size: var(--font-size-2xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card fade-in">
+            <div class="logo-section">
+                <div class="logo-icon">AI</div>
+                <h1 class="login-title">AI Stack Login</h1>
+                <p class="login-subtitle">Access your AI management dashboard</p>
+            </div>
+            
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        class="form-input" 
+                        placeholder="Enter your username"
+                        value="admin"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember" class="checkbox">
+                    <label for="remember" class="checkbox-label">Remember me for 30 days</label>
+                </div>
+                
+                <button type="submit" class="login-button" id="login-btn">
+                    <span class="spinner" style="display: none;"></span>
+                    <span class="btn-text">Sign In</span>
+                    <span class="loading-text" style="display: none;">Signing in...</span>
+                </button>
+            </form>
+            
+            <div class="info-section">
+                <p>Access to AI Stack Management</p>
+                <div class="service-list">
+                    <span class="service-item">Dashboard</span>
+                    <span class="service-item">N8N Workflows</span>
+                    <span class="service-item">Traefik Config</span>
+                </div>
+                <p style="margin-top: var(--spacing-4); font-size: var(--font-size-xs);">
+                    Default: admin / admin123
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMessage = document.getElementById('error-message');
+        const spinner = loginBtn.querySelector('.spinner');
+        const btnText = loginBtn.querySelector('.btn-text');
+        const loadingText = loginBtn.querySelector('.loading-text');
+        
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+            spinner.style.display = 'inline-block';
+            btnText.style.display = 'none';
+            loadingText.style.display = 'inline';
+            errorMessage.style.display = 'none';
+            
+            const formData = new FormData(loginForm);
+            const credentials = {
+                username: formData.get('username'),
+                password: formData.get('password'),
+                remember: formData.get('remember') === 'on'
+            };
+            
+            try {
+                // Simulate authentication (replace with actual Authelia integration)
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                if (credentials.username === 'admin' && credentials.password === 'admin123') {
+                    // Success - redirect to dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    throw new Error('Invalid credentials');
+                }
+            } catch (error) {
+                // Show error
+                errorMessage.textContent = 'Invalid username or password. Please try again.';
+                errorMessage.style.display = 'block';
+                
+                // Reset form state
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('loading');
+                spinner.style.display = 'none';
+                btnText.style.display = 'inline';
+                loadingText.style.display = 'none';
+                
+                // Focus password field
+                document.getElementById('password').focus();
+                document.getElementById('password').select();
+            }
+        });
+        
+        // Auto-focus username field
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('username').focus();
+        });
+        
+        // Enter key handling
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !loginBtn.disabled) {
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -34,6 +34,9 @@ x-n8n: &service-n8n
     - N8N_PROTOCOL=http
     - N8N_PORT=5678
     - WEBHOOK_URL=http://217.154.225.184:5678
+    - N8N_PROXY_HOPS=1
+    - N8N_TRUSTED_PROXY_IPS=["0.0.0.0/0"]
+    - N8N_DISABLE_UI=false
     
     # High-Performance Konfiguration für 24GB RAM
     - N8N_PAYLOAD_SIZE_MAX=32
@@ -51,6 +54,9 @@ x-n8n: &service-n8n
     - N8N_HIRING_BANNER_ENABLED=false
     - GENERIC_TIMEZONE=Europe/Berlin
     - N8N_METRICS_INCLUDE_API_ENDPOINTS=true
+    # Authentication enabled
+    - N8N_USER_MANAGEMENT_DISABLED=false
+    - N8N_BASIC_AUTH_ACTIVE=false
     
     # Ollama Integration
     - OLLAMA_HOST=ollama:11434
@@ -96,6 +102,9 @@ services:
     <<: *service-n8n
     hostname: n8n
     container_name: n8n
+    networks:
+      - demo
+      - web
     ports:
       - "5678:5678"  # Direkter Zugriff über IP:5678
     volumes:
@@ -104,6 +113,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`217.154.225.184`) && PathPrefix(`/n8n`)"
+      - "traefik.http.routers.n8n.tls=false"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -206,10 +220,10 @@ services:
       - DEFAULT_LOCALE=en-US
       - DEFAULT_MODELS=llama3.2:3b,mistral:7b,codellama:13b
       - ENABLE_SIGNUP=false
-      - ENABLE_LOGIN_FORM=false
+      - ENABLE_LOGIN_FORM=true
       - ENABLE_WEB_SEARCH=false
       - ENABLE_LOCAL_WEB_FETCH=true
-      - WEBUI_AUTH=false
+      - WEBUI_AUTH=true
       - WEBUI_NAME="AI Chat"
       - WEBUI_URL=http://217.154.225.184:3001
       - ENABLE_ADMIN_EXPORT=false
@@ -219,6 +233,9 @@ services:
       - ENABLE_MODEL_FILTER=false
       - ENABLE_API_KEY=false
       - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=""
+      - DEFAULT_USER_ROLE=admin
+      - ENABLE_OAUTH_SIGNUP=false
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=false
     volumes:
       - open_webui_data:/app/backend/data
     depends_on:
@@ -228,21 +245,30 @@ services:
     mem_reservation: 512m
     mem_limit: 2g
 
-  # VPS Dashboard - Hauptübersicht aller Services
+  # VPS Dashboard - Hauptübersicht aller Services  
   dashboard:
-    image: nginx:alpine
+    build: ./dashboard
     container_name: vps-dashboard
     hostname: dashboard
     networks: 
       - demo
+      - web
     restart: unless-stopped
     ports:
       - "3000:80"  # Dashboard über IP:3000
     volumes:
-      - ./dashboard:/usr/share/nginx/html:ro
+      - ./dashboard:/var/www/html:rw
+      - ./themes:/var/www/html/themes:ro
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
     # Minimal resources
-    mem_reservation: 64m
-    mem_limit: 256m
+    mem_reservation: 128m
+    mem_limit: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`217.154.225.184`) && PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.dashboard.tls=false"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=80"
 
   # Optional: Monitoring Stack für Ressourcen-Überwachung
   # Auskommentiert - bei Bedarf aktivieren

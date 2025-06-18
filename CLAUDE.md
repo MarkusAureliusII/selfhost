@@ -150,3 +150,4 @@ Stored in `.env` file (not in repo):
 
 ## Memory Notes
 - From now on each run fill out and ChangeLog file ChangeLogsCAUDE.md
+- When creating new files (Ordnerstruktur de) always keep good file structure from a technical, functional and privacy level then decide where to put the new file

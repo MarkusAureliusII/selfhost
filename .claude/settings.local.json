@@ -12,7 +12,10 @@
       "Bash(mv:*)",
       "Bash(ls:*)",
       "Bash(sudo chown:*)",
-      "Bash(apt:*)"
+      "Bash(apt:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

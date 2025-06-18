@@ -1,0 +1,37 @@
+# Simplified Authelia Configuration for AI Stack
+# Working configuration for basic authentication
+
+# Server Configuration
+server:
+  host: 0.0.0.0
+  port: 9091
+
+# Logs Configuration
+log:
+  level: info
+
+# Authentication Backend
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+# Session Configuration
+session:
+  secret: very_important_secret_please_change_me_in_production
+  cookies:
+    - domain: 217.154.225.184
+      authelia_url: http://217.154.225.184:9091
+
+# Storage Configuration
+storage:
+  local:
+    path: /config/db.sqlite3
+
+# Access Control Rules
+access_control:
+  default_policy: one_factor
+
+# Notifier Configuration (required)
+notifier:
+  filesystem:
+    filename: /config/notification.txt

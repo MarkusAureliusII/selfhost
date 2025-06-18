@@ -1,0 +1,190 @@
+/* N8N Unified AI Stack Theme */
+
+/* Import unified theme system */
+@import url('http://217.154.225.184:3000/themes/css/unified-app-theme.css');
+
+/* Override N8N's default styles */
+:root {
+  --color-background-xlight: var(--primary-bg) !important;
+  --color-background-light: var(--secondary-bg) !important;
+  --color-background-base: var(--secondary-bg) !important;
+  --color-background-dark: var(--tertiary-bg) !important;
+  
+  --color-foreground-xlight: var(--text-secondary) !important;
+  --color-foreground-light: var(--text-secondary) !important;
+  --color-foreground-base: var(--text-primary) !important;
+  --color-foreground-dark: var(--text-primary) !important;
+  
+  --color-primary: var(--accent-color) !important;
+  --color-primary-shade-1: var(--accent-hover) !important;
+  
+  --border-radius-base: var(--radius-base) !important;
+  --border-radius-large: var(--radius-md) !important;
+  
+  --font-family-primary: var(--font-family) !important;
+  --font-family-monospace: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Global font override */
+* {
+  font-family: var(--font-family) !important;
+}
+
+/* Dark mode for main container */
+.el-container {
+  background-color: var(--primary-bg) !important;
+}
+
+/* Sidebar styling */
+.el-aside {
+  background-color: var(--secondary-bg) !important;
+  border-right: 1px solid var(--border-primary) !important;
+}
+
+/* Header styling */
+.el-header {
+  background-color: var(--secondary-bg) !important;
+  border-bottom: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Main content area */
+.el-main {
+  background-color: var(--primary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Node styling */
+.node-default {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Input fields */
+.el-input__inner {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Buttons */
+.el-button {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+.el-button--primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.el-button--primary:hover {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* Menu items */
+.el-menu {
+  background-color: var(--secondary-bg) !important;
+}
+
+.el-menu-item {
+  color: var(--text-secondary) !important;
+}
+
+.el-menu-item:hover {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.el-menu-item.is-active {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+/* Cards and panels */
+.el-card {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+/* Tables */
+.el-table {
+  background-color: var(--secondary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.el-table th {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.el-table td {
+  border-bottom: 1px solid var(--border-primary) !important;
+}
+
+/* Workflow canvas */
+.jtk-canvas {
+  background-color: var(--primary-bg) !important;
+}
+
+/* Node connections */
+.jtk-connector {
+  stroke: var(--border-secondary) !important;
+}
+
+.jtk-connector:hover {
+  stroke: var(--accent-color) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted) !important;
+}
+
+/* Custom N8N specific classes */
+.workflow-canvas {
+  background-color: var(--primary-bg) !important;
+}
+
+.node-view {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.parameter-input-list {
+  background-color: var(--secondary-bg) !important;
+}
+
+.code-editor {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Monaco editor dark theme override */
+.monaco-editor {
+  background-color: var(--tertiary-bg) !important;
+}
+
+.monaco-editor .view-lines {
+  color: var(--text-primary) !important;
+}

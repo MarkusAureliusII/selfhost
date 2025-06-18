@@ -1,0 +1,220 @@
+/* Open WebUI Theme Override - Dark Mode with Inter Font */
+@import url('/themes/css/variables.css');
+
+/* Global font override */
+* {
+  font-family: var(--font-family) !important;
+}
+
+/* Root CSS variables override */
+:root {
+  --primary-bg: var(--primary-bg) !important;
+  --secondary-bg: var(--secondary-bg) !important;
+  --tertiary-bg: var(--tertiary-bg) !important;
+  --accent-color: var(--accent-color) !important;
+  --text-primary: var(--text-primary) !important;
+  --text-secondary: var(--text-secondary) !important;
+}
+
+/* Dark theme overrides */
+html[data-theme="dark"] {
+  --color-bg-primary: var(--primary-bg);
+  --color-bg-secondary: var(--secondary-bg);
+  --color-bg-tertiary: var(--tertiary-bg);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent: var(--accent-color);
+}
+
+/* Main layout */
+.main-layout {
+  background-color: var(--primary-bg) !important;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--secondary-bg) !important;
+  border-right: 1px solid var(--border-primary) !important;
+}
+
+/* Chat interface */
+.chat-container {
+  background-color: var(--primary-bg) !important;
+}
+
+.chat-message {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-primary) !important;
+}
+
+.chat-message.user {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}
+
+.chat-message.assistant {
+  background-color: var(--secondary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Input areas */
+.chat-input {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+.chat-input:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: white !important;
+  border-radius: var(--radius-base) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-secondary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Navigation */
+.nav-item {
+  color: var(--text-secondary) !important;
+}
+
+.nav-item:hover {
+  color: var(--text-primary) !important;
+  background-color: var(--secondary-bg) !important;
+}
+
+.nav-item.active {
+  color: var(--accent-color) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Model selector */
+.model-selector {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+/* Cards and containers */
+.card {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.modal {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Code blocks */
+pre, code {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-primary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary-bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary) !important;
+  border-radius: var(--radius-base) !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted) !important;
+}
+
+/* Loading states */
+.spinner {
+  border-color: var(--border-primary) !important;
+  border-top-color: var(--accent-color) !important;
+}
+
+/* Alerts and notifications */
+.alert {
+  border-radius: var(--radius-base) !important;
+}
+
+.alert-success {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+  color: var(--success-color) !important;
+}
+
+.alert-error {
+  background-color: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.2) !important;
+  color: var(--error-color) !important;
+}
+
+.alert-warning {
+  background-color: rgba(245, 158, 11, 0.1) !important;
+  border: 1px solid rgba(245, 158, 11, 0.2) !important;
+  color: var(--warning-color) !important;
+}
+
+/* Settings panel */
+.settings-panel {
+  background-color: var(--secondary-bg) !important;
+  border: 1px solid var(--border-primary) !important;
+}
+
+.settings-item {
+  border-bottom: 1px solid var(--border-primary) !important;
+}
+
+/* Conversation list */
+.conversation-list {
+  background-color: var(--secondary-bg) !important;
+}
+
+.conversation-item {
+  border-bottom: 1px solid var(--border-primary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.conversation-item:hover {
+  background-color: var(--tertiary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+.conversation-item.active {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+}

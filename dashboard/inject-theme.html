@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Loading AI Stack...</title>
+    <link rel="stylesheet" href="http://217.154.225.184:3000/serve-theme.php?file=unified-css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #0f172a;
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] body {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+        
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: var(--ai-primary-bg, #ffffff);
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .loading-text {
+            color: var(--ai-text-secondary, #475569);
+            font-size: 0.875rem;
+        }
+        
+        .app-frame {
+            width: 100%;
+            height: 100vh;
+            border: none;
+            display: none;
+        }
+        
+        .app-frame.loaded {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container" id="loading">
+        <div class="loading-logo">AI</div>
+        <div class="loading-text">Loading AI Stack application...</div>
+    </div>
+    
+    <iframe id="appFrame" class="app-frame" src=""></iframe>
+    
+    <script src="http://217.154.225.184:3000/serve-theme.php?file=unified-js"></script>
+    <script>
+        // Get target application from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetApp = urlParams.get('app');
+        const targetUrl = urlParams.get('url');
+        
+        const appUrls = {
+            'chat': 'http://217.154.225.184:3001',
+            'n8n': 'http://217.154.225.184:5678',
+            'ollama': 'http://217.154.225.184:11434',
+            'qdrant': 'http://217.154.225.184:6333',
+            'traefik': 'http://217.154.225.184:8080'
+        };
+        
+        // Apply theme immediately
+        const theme = localStorage.getItem('ai-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        
+        // Load target application
+        const frame = document.getElementById('appFrame');
+        const loading = document.getElementById('loading');
+        
+        const url = targetUrl || appUrls[targetApp];
+        if (url) {
+            frame.src = url;
+            
+            // Show app after loading
+            frame.onload = () => {
+                setTimeout(() => {
+                    loading.classList.add('fade-out');
+                    frame.classList.add('loaded');
+                    
+                    // Try to inject theme into iframe (if same-origin)
+                    try {
+                        const iframeDoc = frame.contentDocument || frame.contentWindow.document;
+                        
+                        // Inject CSS
+                        const link = iframeDoc.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = 'http://217.154.225.184:3000/serve-theme.php?file=unified-css';
+                        iframeDoc.head.appendChild(link);
+                        
+                        // Inject JS
+                        const script = iframeDoc.createElement('script');
+                        script.src = 'http://217.154.225.184:3000/serve-theme.php?file=unified-js';
+                        iframeDoc.head.appendChild(script);
+                        
+                        // Apply theme
+                        iframeDoc.documentElement.setAttribute('data-theme', theme);
+                    } catch (e) {
+                        console.log('Cannot inject into iframe due to CORS policy');
+                    }
+                }, 500);
+            };
+        } else {
+            loading.innerHTML = '<div class="loading-logo">⚠️</div><div class="loading-text">Invalid application specified</div>';
+        }
+        
+        // Handle theme changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'ai-theme') {
+                document.documentElement.setAttribute('data-theme', e.newValue);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,446 @@
+/* 
+ * AI Stack Unified Application Theme
+ * This CSS will be injected into all applications to create a seamless experience
+ */
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* CSS Variables for Light/Dark Theme */
+:root {
+    /* Light Mode Variables */
+    --ai-primary-bg: #ffffff;
+    --ai-secondary-bg: #f8fafc;
+    --ai-tertiary-bg: #f1f5f9;
+    --ai-card-bg: #ffffff;
+    --ai-text-primary: #0f172a;
+    --ai-text-secondary: #475569;
+    --ai-text-muted: #94a3b8;
+    --ai-accent-color: #3b82f6;
+    --ai-accent-hover: #2563eb;
+    --ai-accent-light: #dbeafe;
+    --ai-border-primary: #e2e8f0;
+    --ai-border-secondary: #cbd5e1;
+    --ai-success-color: #10b981;
+    --ai-warning-color: #f59e0b;
+    --ai-error-color: #ef4444;
+    --ai-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --ai-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --ai-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --ai-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --ai-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --ai-primary-bg: #0f172a;
+    --ai-secondary-bg: #1e293b;
+    --ai-tertiary-bg: #334155;
+    --ai-card-bg: #1e293b;
+    --ai-text-primary: #f8fafc;
+    --ai-text-secondary: #cbd5e1;
+    --ai-text-muted: #64748b;
+    --ai-accent-color: #60a5fa;
+    --ai-accent-hover: #3b82f6;
+    --ai-accent-light: #1e3a8a;
+    --ai-border-primary: #334155;
+    --ai-border-secondary: #475569;
+    --ai-success-color: #34d399;
+    --ai-warning-color: #fbbf24;
+    --ai-error-color: #f87171;
+    --ai-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --ai-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --ai-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --ai-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Global Font Override */
+* {
+    font-family: var(--ai-font-family) !important;
+}
+
+/* Body and HTML overrides */
+html, body {
+    background-color: var(--ai-primary-bg) !important;
+    color: var(--ai-text-primary) !important;
+    font-family: var(--ai-font-family) !important;
+    line-height: 1.6 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Header/Navigation Unification */
+.header, .navbar, .nav, .navigation, [class*="header"], [class*="navbar"], [class*="nav"] {
+    background-color: var(--ai-card-bg) !important;
+    border-bottom: 1px solid var(--ai-border-primary) !important;
+    box-shadow: var(--ai-shadow-sm) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+/* Add AI Stack Logo to Applications */
+.ai-stack-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    padding: 1rem !important;
+    background: var(--ai-card-bg) !important;
+    border-bottom: 1px solid var(--ai-border-primary) !important;
+    box-shadow: var(--ai-shadow-sm) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+}
+
+.ai-stack-logo {
+    width: 32px !important;
+    height: 32px !important;
+    background: linear-gradient(135deg, var(--ai-accent-color), var(--ai-accent-hover)) !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+}
+
+.ai-stack-title {
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    color: var(--ai-text-primary) !important;
+}
+
+.ai-stack-breadcrumb {
+    color: var(--ai-text-secondary) !important;
+    font-size: 0.875rem !important;
+    margin-left: auto !important;
+}
+
+/* Sidebar Unification */
+.sidebar, .side-nav, .left-panel, [class*="sidebar"], [class*="side"] {
+    background-color: var(--ai-secondary-bg) !important;
+    border-right: 1px solid var(--ai-border-primary) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+/* Main Content Area */
+.main, .content, .main-content, [class*="main"], [class*="content"] {
+    background-color: var(--ai-primary-bg) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+/* Card and Panel Unification */
+.card, .panel, .widget, .box, [class*="card"], [class*="panel"], [class*="widget"] {
+    background: var(--ai-card-bg) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--ai-shadow-sm) !important;
+    color: var(--ai-text-primary) !important;
+    transition: all 0.2s ease !important;
+}
+
+.card:hover, .panel:hover, .widget:hover {
+    box-shadow: var(--ai-shadow-md) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Button Unification */
+.btn, .button, button, input[type="button"], input[type="submit"] {
+    font-family: var(--ai-font-family) !important;
+    font-weight: 500 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.btn-primary, .button-primary, .primary {
+    background: var(--ai-accent-color) !important;
+    color: white !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.btn-primary:hover, .button-primary:hover {
+    background: var(--ai-accent-hover) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-secondary, .button-secondary, .secondary {
+    background: var(--ai-secondary-bg) !important;
+    color: var(--ai-text-secondary) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.btn-secondary:hover, .button-secondary:hover {
+    background: var(--ai-tertiary-bg) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+/* Input Field Unification */
+input, textarea, select {
+    background-color: var(--ai-secondary-bg) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    border-radius: 8px !important;
+    color: var(--ai-text-primary) !important;
+    padding: 0.5rem 0.75rem !important;
+    font-family: var(--ai-font-family) !important;
+    transition: all 0.2s ease !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none !important;
+    border-color: var(--ai-accent-color) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    background-color: var(--ai-card-bg) !important;
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--ai-text-muted) !important;
+}
+
+/* Link Unification */
+a {
+    color: var(--ai-accent-color) !important;
+    text-decoration: none !important;
+    transition: color 0.2s ease !important;
+}
+
+a:hover {
+    color: var(--ai-accent-hover) !important;
+}
+
+/* Table Unification */
+table {
+    background-color: var(--ai-card-bg) !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+
+th {
+    background-color: var(--ai-secondary-bg) !important;
+    color: var(--ai-text-primary) !important;
+    font-weight: 600 !important;
+    padding: 0.75rem !important;
+    border-bottom: 1px solid var(--ai-border-primary) !important;
+}
+
+td {
+    padding: 0.75rem !important;
+    border-bottom: 1px solid var(--ai-border-primary) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+tr:hover {
+    background-color: var(--ai-secondary-bg) !important;
+}
+
+/* Modal/Dialog Unification */
+.modal, .dialog, .popup, [class*="modal"], [class*="dialog"] {
+    background-color: var(--ai-card-bg) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--ai-shadow-xl) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+.modal-backdrop, .overlay {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Status and Badge Unification */
+.badge, .tag, .status, [class*="badge"], [class*="status"] {
+    border-radius: 20px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    padding: 0.25rem 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+}
+
+.success, .online, .active {
+    background: #dcfce7 !important;
+    color: var(--ai-success-color) !important;
+}
+
+.warning, .pending {
+    background: #fef3c7 !important;
+    color: var(--ai-warning-color) !important;
+}
+
+.error, .offline, .inactive {
+    background: #fee2e2 !important;
+    color: var(--ai-error-color) !important;
+}
+
+[data-theme="dark"] .success,
+[data-theme="dark"] .online,
+[data-theme="dark"] .active {
+    background: #064e3b !important;
+}
+
+[data-theme="dark"] .warning,
+[data-theme="dark"] .pending {
+    background: #451a03 !important;
+}
+
+[data-theme="dark"] .error,
+[data-theme="dark"] .offline,
+[data-theme="dark"] .inactive {
+    background: #450a0a !important;
+}
+
+/* Scrollbar Unification */
+::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--ai-secondary-bg) !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--ai-border-secondary) !important;
+    border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--ai-text-muted) !important;
+}
+
+/* Loading/Spinner Unification */
+.spinner, .loading, [class*="spinner"], [class*="loading"] {
+    border-color: var(--ai-border-primary) !important;
+    border-top-color: var(--ai-accent-color) !important;
+}
+
+/* Text Color Hierarchy */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--ai-text-primary) !important;
+    font-family: var(--ai-font-family) !important;
+    font-weight: 600 !important;
+}
+
+p, span, div {
+    color: var(--ai-text-primary) !important;
+}
+
+.text-secondary, .secondary-text {
+    color: var(--ai-text-secondary) !important;
+}
+
+.text-muted, .muted-text {
+    color: var(--ai-text-muted) !important;
+}
+
+/* Animation Consistency */
+@keyframes ai-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in, .animate-in {
+    animation: ai-fade-in 0.3s ease-out !important;
+}
+
+/* Theme Toggle Integration */
+.ai-theme-toggle {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    z-index: 9999 !important;
+    background: var(--ai-secondary-bg) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    color: var(--ai-text-secondary) !important;
+    box-shadow: var(--ai-shadow-md) !important;
+}
+
+.ai-theme-toggle:hover {
+    background: var(--ai-tertiary-bg) !important;
+    color: var(--ai-text-primary) !important;
+}
+
+/* Navigation Between Apps */
+.ai-app-nav {
+    position: fixed !important;
+    bottom: 1rem !important;
+    right: 1rem !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    gap: 0.5rem !important;
+}
+
+.ai-app-nav-item {
+    background: var(--ai-card-bg) !important;
+    border: 1px solid var(--ai-border-primary) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    color: var(--ai-text-secondary) !important;
+    box-shadow: var(--ai-shadow-md) !important;
+    text-decoration: none !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+}
+
+.ai-app-nav-item:hover {
+    background: var(--ai-accent-color) !important;
+    color: white !important;
+    transform: translateY(-2px) !important;
+}
+
+.ai-app-nav-item.active {
+    background: var(--ai-accent-color) !important;
+    color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ai-stack-header {
+        padding: 0.75rem !important;
+    }
+    
+    .ai-stack-title {
+        font-size: 1rem !important;
+    }
+    
+    .ai-theme-toggle {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+    }
+    
+    .ai-app-nav {
+        bottom: 0.5rem !important;
+        right: 0.5rem !important;
+        flex-direction: column !important;
+    }
+}
+
+/* Force Important Overrides for Stubborn Applications */
+.override-important {
+    background-color: var(--ai-primary-bg) !important;
+    color: var(--ai-text-primary) !important;
+    font-family: var(--ai-font-family) !important;
+}
+
+/* Utility Classes */
+.ai-hidden { display: none !important; }
+.ai-visible { display: block !important; }
+.ai-flex { display: flex !important; }
+.ai-grid { display: grid !important; }
+.ai-text-center { text-align: center !important; }
+.ai-text-left { text-align: left !important; }
+.ai-text-right { text-align: right !important; }
+.ai-rounded { border-radius: 8px !important; }
+.ai-shadow { box-shadow: var(--ai-shadow-md) !important; }

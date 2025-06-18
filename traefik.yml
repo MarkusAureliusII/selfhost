@@ -19,6 +19,8 @@ services:
       # Provider
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
       
       # Entrypoints
       - --entrypoints.web.address=:80
@@ -32,10 +34,10 @@ services:
       # Enhanced Security Headers
       - --entrypoints.websecure.http.tls.options=modern@file
       
-      # HTTP -> HTTPS Redirect
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      # HTTP -> HTTPS Redirect (disabled for development)
+      # - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      # - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      # - --entrypoints.web.http.redirections.entrypoint.permanent=true
       
       # Logging für Monitoring
       - --log.level=INFO
@@ -48,20 +50,19 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./ssl/letsencrypt:/letsencrypt
       - ./config/traefik-config:/etc/traefik/dynamic:ro  # Für erweiterte Konfiguration
+      - ./services/traefik:/etc/traefik/dynamic:ro
+      - ./config/auth:/config/auth:ro
     labels:
-      # Traefik Dashboard mit Security
+      # Traefik Dashboard mit Authentication
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.avantera-digital.de`)"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.rule=Host(`217.154.225.184`) && PathPrefix(`/traefik`)"
+      - "traefik.http.routers.traefik.tls=false"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.middlewares=auth@file,secure-headers@docker"
       
       # Security Middleware
-      - "traefik.http.routers.traefik.middlewares=secure-headers@docker"
       - "traefik.http.middlewares.secure-headers.headers.framedeny=true"
-      - "traefik.http.middlewares.secure-headers.headers.sslredirect=true"
-      - "traefik.http.middlewares.secure-headers.headers.stsSeconds=31536000"
-      - "traefik.http.middlewares.secure-headers.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.secure-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.secure-headers.headers.sslredirect=false"
       - "traefik.http.middlewares.secure-headers.headers.contentTypeNosniff=true"
       - "traefik.http.middlewares.secure-headers.headers.browserXssFilter=true"
       - "traefik.http.middlewares.secure-headers.headers.referrerPolicy=strict-origin-when-cross-origin"

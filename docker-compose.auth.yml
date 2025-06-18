@@ -1,0 +1,41 @@
+# Authentication Service Configuration
+# Authelia for unified login to Dashboard and N8N
+
+services:
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    hostname: authelia
+    restart: unless-stopped
+    networks:
+      - web
+      - demo
+    ports:
+      - "9091:9091"
+    volumes:
+      - ./auth/config:/config
+    environment:
+      - TZ=Europe/Berlin
+      - AUTHELIA_JWT_SECRET=very_important_secret_change_me
+      - AUTHELIA_SESSION_SECRET=another_very_important_secret_change_me
+      - AUTHELIA_STORAGE_ENCRYPTION_KEY=you_must_generate_a_random_key_of_at_least_20_chars_and_you_must_configure_this
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authelia.rule=Host(`217.154.225.184`) && PathPrefix(`/auth`)"
+      - "traefik.http.routers.authelia.tls=false"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+      
+      # Authelia Middleware
+      - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=http://217.154.225.184/auth"
+      - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+    
+    # Resource limits
+    mem_reservation: 64m
+    mem_limit: 128m
+
+networks:
+  web:
+    external: true
+  demo:
+    external: true

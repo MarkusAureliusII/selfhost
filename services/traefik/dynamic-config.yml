@@ -1,0 +1,107 @@
+http:
+  middlewares:
+    auth:
+      basicAuth:
+        usersFile: "/config/auth/.htpasswd"
+        realm: "AI Stack Login"
+        removeHeader: true
+
+    # Strip prefix for N8N routing
+    n8n-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/n8n"
+    
+    # Strip prefix for Open WebUI routing
+    chat-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/chat"
+
+    # CORS middleware for API access
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+          - POST
+          - DELETE
+        accessControlAllowOriginList:
+          - "http://217.154.225.184"
+          - "http://217.154.225.184:3000"
+          - "http://217.154.225.184:5678"
+        accessControlMaxAge: 100
+        addVaryHeader: true
+
+    # Security headers
+    security:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customRequestHeaders:
+          X-Forwarded-Proto: "http"
+
+  routers:
+    # Dashboard with auth
+    dashboard-secure:
+      rule: "Host(`217.154.225.184`) && PathPrefix(`/dashboard`)"
+      service: dashboard
+      middlewares:
+        - auth
+        - security
+
+    # N8N with auth  
+    n8n-secure:
+      rule: "Host(`217.154.225.184`) && PathPrefix(`/n8n`)"
+      service: n8n
+      middlewares:
+        - auth
+        - security
+        - n8n-stripprefix
+
+
+    # Open WebUI without auth (public access)
+    open-webui-public:
+      rule: "Host(`217.154.225.184`) && PathPrefix(`/chat`)"
+      service: open-webui
+      middlewares:
+        - chat-stripprefix
+
+    # Ollama API without auth (public access)
+    ollama-api-public:
+      rule: "Host(`217.154.225.184`) && PathPrefix(`/api/ollama`)"
+      service: ollama
+
+    # Qdrant without auth (public access)
+    qdrant-public:
+      rule: "Host(`217.154.225.184`) && PathPrefix(`/qdrant`)"
+      service: qdrant
+
+  services:
+    dashboard:
+      loadBalancer:
+        servers:
+          - url: "http://dashboard:80"
+
+    n8n:
+      loadBalancer:
+        servers:
+          - url: "http://n8n:5678"
+
+    open-webui:
+      loadBalancer:
+        servers:
+          - url: "http://open-webui:8080"
+
+    ollama:
+      loadBalancer:
+        servers:
+          - url: "http://ollama:11434"
+
+    qdrant:
+      loadBalancer:
+        servers:
+          - url: "http://qdrant:6333"

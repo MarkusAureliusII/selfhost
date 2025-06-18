@@ -49,6 +49,29 @@
    - Configured direct access mode
    - Switched to English locale
 
+3. **N8N Trusted Header Error**: Fixed proxy configuration
+   - Added N8N_PROXY_HOPS=1 and N8N_TRUSTED_PROXY_IPS
+   - Disabled user management for direct access
+   - Resolved "trusted header" authentication issues
+
+#### 🔐 Authentication System Implemented - June 18, 2025
+
+**BasicAuth Unified Authentication**
+- **Protected Services**: Dashboard and N8N require BasicAuth login
+  - Credentials: admin/admin123
+  - Access via: `http://217.154.225.184/dashboard` and `http://217.154.225.184/n8n`
+- **Public Services**: Open WebUI, Ollama API, and Qdrant remain freely accessible
+  - Open WebUI: `http://217.154.225.184:3001`
+  - Ollama API: `http://217.154.225.184:11434`
+  - Qdrant: `http://217.154.225.184:6333`
+
+**Technical Implementation**:
+- Replaced complex Authelia configuration with simpler BasicAuth
+- Created htpasswd file with encrypted credentials
+- Configured Traefik middlewares for selective authentication
+- Added path stripping for proper service routing
+- Maintained security headers and CORS configuration
+
 3. **Traefik SSL Configuration**: Updated certificate paths
    - Moved to `ssl/letsencrypt` directory
    - Fixed configuration file paths
@@ -179,4 +202,37 @@ sudo /var/www/selfhost/scripts/maintenance.sh
 
 ---
 
-*Last Updated: June 17, 2025 23:57 UTC by Claude Code Assistant*
+---
+
+## 🔧 N8N Trusted Header Fix - June 18, 2025 00:05 UTC
+
+### Issue Resolved
+**Problem**: N8N showing "Your provider has not provided a trusted header" error
+**Root Cause**: Missing proxy and authentication configuration
+
+### Configuration Changes Applied
+```yaml
+# Added trusted proxy settings
+- N8N_PROXY_HOPS=1
+- N8N_TRUSTED_PROXY_IPS=["0.0.0.0/0"]
+- N8N_DISABLE_UI=false
+
+# Disabled authentication barriers
+- N8N_USER_MANAGEMENT_DISABLED=true
+- N8N_BASIC_AUTH_ACTIVE=false
+```
+
+### Status After Fix
+- ✅ N8N accessible at http://217.154.225.184:5678
+- ✅ HTTP 200 response confirmed
+- ✅ UI loading properly
+- ✅ No more trusted header errors
+
+### Deprecated Warnings Cleaned
+- Removed duplicate binary data mode settings
+- Maintained filesystem mode for binary data
+- Cleaned up environment variables
+
+---
+
+*Last Updated: June 18, 2025 00:05 UTC by Claude Code Assistant*
