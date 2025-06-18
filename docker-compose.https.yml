@@ -4,8 +4,10 @@ volumes:
   n8n_binary_data:
   postgres_storage:
   ollama_storage:
-  qdrant_storage:
   open_webui_data:
+  # Supabase Volumes
+  supabase_db_storage:
+  supabase_storage_data:
   # Zusätzliche Volumes für erweiterte Funktionen
   monitoring_storage:
   backup_storage:
@@ -66,6 +68,17 @@ x-n8n: &service-n8n
     
     # Ollama Integration
     - OLLAMA_HOST=ollama:11434
+    
+    # Supabase Integration for N8N
+    - SUPABASE_URL=http://supabase-kong:8000
+    - SUPABASE_REST_URL=http://supabase-kong:8000/rest/v1/
+    - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+    - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    - SUPABASE_DB_HOST=supabase-db
+    - SUPABASE_DB_PORT=5432
+    - SUPABASE_DB_NAME=postgres
+    - SUPABASE_DB_USER=authenticator
+    - SUPABASE_DB_PASSWORD=${SUPABASE_DB_PASSWORD}
   env_file:
     - .env
   restart: unless-stopped
@@ -121,31 +134,305 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.n8n.rule=Host(`217.154.225.184`) && PathPrefix(`/n8n`)"
+      - "traefik.http.routers.n8n.rule=Host(`217.154.225.184`) && PathPrefix(`/automation`)"
       - "traefik.http.routers.n8n.tls=false"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+      - "traefik.http.middlewares.n8n-stripprefix.stripprefix.prefixes=/automation"
+      - "traefik.http.routers.n8n.middlewares=n8n-stripprefix"
 
-  qdrant:
-    image: qdrant/qdrant:latest
-    hostname: qdrant
-    container_name: qdrant
+  # Supabase Self-Hosted - Komplettes Setup mit Interface + Webhooks + API
+  supabase-db:
+    image: pgvector/pgvector:pg15
+    hostname: supabase-db
+    container_name: supabase-db
     networks: 
       - demo
     restart: unless-stopped
     ports:
-      - "6333:6333"  # Direkter Zugriff über IP:6333
+      - "5432:5432"  # PostgreSQL direkt verfügbar
     environment:
-      - QDRANT__SERVICE__HTTP_PORT=6333
-      - QDRANT__SERVICE__ENABLE_CORS=true
-      # Performance-Optimierungen für große Vector-Datasets
-      - QDRANT__SERVICE__MAX_REQUEST_SIZE_MB=128
-      - QDRANT__STORAGE__PERFORMANCE__MAX_SEARCH_THREADS=6
-      - QDRANT__STORAGE__OPTIMIZERS__DEFAULT_SEGMENT_NUMBER=4
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
     volumes:
-      - qdrant_storage:/qdrant/storage
-    # Flexible Ressourcen für große Vector-Operationen
-    mem_reservation: 1g    # Kann bei großen Vector-Operationen mehr nehmen
-    # Kein mem_limit - kann bei Bedarf viel RAM für große Embeddings nutzen
+      - supabase_db_storage:/var/lib/postgresql/data
+      - ./config/supabase/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    # Performance für AI Workloads
+    mem_reservation: 2g
+    mem_limit: 8g
+    command: >
+      postgres -c max_connections=200
+      -c shared_buffers=512MB
+      -c effective_cache_size=2GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c log_min_messages=fatal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  supabase-studio:
+    image: supabase/studio:latest
+    hostname: supabase-studio
+    container_name: supabase-studio
+    networks:
+      - demo
+      - web
+    restart: unless-stopped
+    ports:
+      - "6333:3000"  # Supabase Studio Interface (gleicher Port wie Qdrant)
+    environment:
+      - STUDIO_PG_META_URL=http://supabase-meta:8080
+      - POSTGRES_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DEFAULT_ORGANIZATION_NAME=AI Stack
+      - DEFAULT_PROJECT_NAME=AI Stack Database
+      - SUPABASE_PUBLIC_URL=http://217.154.225.184:6333
+      - SUPABASE_URL=http://217.154.225.184:8000
+      - SUPABASE_REST_URL=http://217.154.225.184:8000/rest/v1/
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - LOGFLARE_API_KEY=${LOGFLARE_API_KEY:-stub}
+      - LOGFLARE_URL=http://supabase-analytics:4000
+      - NEXT_PUBLIC_ENABLE_LOGS=true
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-meta:
+        condition: service_started
+    mem_reservation: 512m
+    mem_limit: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.supabase.rule=Host(`217.154.225.184`) && PathPrefix(`/database`)"
+      - "traefik.http.routers.supabase.tls=false"
+      - "traefik.http.services.supabase.loadbalancer.server.port=3000"
+
+  supabase-kong:
+    image: kong:2.8.1
+    hostname: supabase-kong
+    container_name: supabase-kong
+    networks:
+      - demo
+    restart: unless-stopped
+    ports:
+      - "8000:8000"  # Supabase API Gateway
+      - "8443:8443"  # HTTPS API Gateway
+    environment:
+      - KONG_DATABASE=off
+      - KONG_DECLARATIVE_CONFIG=/var/lib/kong/kong.yml
+      - KONG_DNS_ORDER=LAST,A,CNAME
+      - KONG_PLUGINS=request-id,kong-upstream-jwt,cors
+      - KONG_LOG_LEVEL=info
+    volumes:
+      - ./config/supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+    mem_limit: 1g
+
+  supabase-auth:
+    image: supabase/gotrue:v2.132.3
+    hostname: supabase-auth
+    container_name: supabase-auth
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - GOTRUE_API_HOST=0.0.0.0
+      - GOTRUE_API_PORT=9999
+      - API_EXTERNAL_URL=http://217.154.225.184:8000
+      - GOTRUE_DB_DRIVER=postgres
+      - GOTRUE_DB_DATABASE_URL=postgres://supabase_auth_admin:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - GOTRUE_SITE_URL=http://217.154.225.184:6333
+      - GOTRUE_URI_ALLOW_LIST=http://217.154.225.184:3000,http://217.154.225.184:3001,http://217.154.225.184:5678,http://217.154.225.184:6333,http://217.154.225.184:8000
+      - GOTRUE_DISABLE_SIGNUP=false
+      - GOTRUE_JWT_ADMIN_ROLES=service_role
+      - GOTRUE_JWT_AUD=authenticated
+      - GOTRUE_JWT_DEFAULT_GROUP_NAME=authenticated
+      - GOTRUE_JWT_EXP=3600
+      - GOTRUE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - GOTRUE_EXTERNAL_EMAIL_ENABLED=true
+      - GOTRUE_MAILER_AUTOCONFIRM=true
+      - GOTRUE_SMTP_ADMIN_EMAIL=admin@aistack.local
+      - GOTRUE_SMTP_HOST=${SMTP_HOST:-localhost}
+      - GOTRUE_SMTP_PORT=${SMTP_PORT:-1025}
+      - GOTRUE_SMTP_USER=${SMTP_USER:-}
+      - GOTRUE_SMTP_PASS=${SMTP_PASS:-}
+      - GOTRUE_SMTP_SENDER_NAME=AI Stack
+      - GOTRUE_MAILER_URLPATHS_INVITE=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_CONFIRMATION=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_RECOVERY=/auth/v1/verify
+      - GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE=/auth/v1/verify
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-rest:
+    image: postgrest/postgrest:v12.0.1
+    hostname: supabase-rest
+    container_name: supabase-rest
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PGRST_DB_URI=postgres://authenticator:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - PGRST_DB_SCHEMAS=public,storage,graphql_public
+      - PGRST_DB_ANON_ROLE=anon
+      - PGRST_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - PGRST_DB_USE_LEGACY_GUCS=false
+      - PGRST_APP_SETTINGS_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - PGRST_APP_SETTINGS_JWT_EXP=3600
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-realtime:
+    image: supabase/realtime:v2.25.50
+    hostname: supabase-realtime
+    container_name: supabase-realtime
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PORT=4000
+      - DB_HOST=supabase-db
+      - DB_PORT=5432
+      - DB_USER=supabase_realtime_admin
+      - DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DB_NAME=postgres
+      - DB_AFTER_CONNECT_QUERY=SET search_path TO _realtime
+      - DB_ENC_KEY=supabaserealtimedevenc
+      - API_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - FLY_ALLOC_ID=fly123
+      - FLY_APP_NAME=realtime
+      - SECRET_KEY_BASE=${SUPABASE_SECRET_KEY_BASE}
+      - ERL_AFLAGS=-proto_dist inet_tcp
+      - ENABLE_TAILSCALE=false
+      - DNS_NODES='finder@supabase-realtime'
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-meta:
+    image: supabase/postgres-meta:v0.68.0
+    hostname: supabase-meta
+    container_name: supabase-meta
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - PG_META_PORT=8080
+      - PG_META_DB_HOST=supabase-db
+      - PG_META_DB_PORT=5432
+      - PG_META_DB_NAME=postgres
+      - PG_META_DB_USER=supabase_admin
+      - PG_META_DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  supabase-storage:
+    image: supabase/storage-api:v0.40.4
+    hostname: supabase-storage
+    container_name: supabase-storage
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - ANON_KEY=${SUPABASE_ANON_KEY}
+      - SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - POSTGREST_URL=http://supabase-rest:3000
+      - PGRST_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - DATABASE_URL=postgres://supabase_storage_admin:${SUPABASE_DB_PASSWORD:-supabase123}@supabase-db:5432/postgres
+      - FILE_SIZE_LIMIT=52428800
+      - STORAGE_BACKEND=file
+      - FILE_STORAGE_BACKEND_PATH=/var/lib/storage
+      - TENANT_ID=stub
+      - REGION=stub
+      - GLOBAL_S3_BUCKET=stub
+      - ENABLE_IMAGE_TRANSFORMATION=true
+      - IMGPROXY_URL=http://supabase-imgproxy:5001
+    volumes:
+      - supabase_storage_data:/var/lib/storage
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+      supabase-rest:
+        condition: service_started
+    mem_reservation: 256m
+
+  supabase-imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    hostname: supabase-imgproxy
+    container_name: supabase-imgproxy
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - IMGPROXY_BIND=0.0.0.0:5001
+      - IMGPROXY_LOCAL_FILESYSTEM_ROOT=/
+      - IMGPROXY_USE_ETAG=true
+      - IMGPROXY_ENABLE_WEBP_DETECTION=true
+    volumes:
+      - supabase_storage_data:/var/lib/storage:ro
+    mem_reservation: 128m
+
+  supabase-edge-functions:
+    image: supabase/edge-runtime:v1.8.2
+    hostname: supabase-edge-functions
+    container_name: supabase-edge-functions
+    networks:
+      - demo
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - SUPABASE_URL=http://supabase-kong:8000
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./config/supabase/functions:/home/deno/functions:ro
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
+
+  # Analytics für Logs (optional aber hilfreich für Webhooks)
+  supabase-analytics:
+    image: supabase/logflare:1.4.0
+    hostname: supabase-analytics
+    container_name: supabase-analytics
+    networks:
+      - demo
+    restart: unless-stopped
+    ports:
+      - "4000:4000"  # Analytics Interface
+    environment:
+      - DB_USERNAME=supabase_admin
+      - DB_PASSWORD=${SUPABASE_DB_PASSWORD:-supabase123}
+      - DB_DATABASE=postgres
+      - DB_HOSTNAME=supabase-db
+      - DB_PORT=5432
+      - LOGFLARE_NODE_HOST=localhost
+      - RELEASE_COOKIE=cookie
+      - SECRET_KEY_BASE=${SUPABASE_SECRET_KEY_BASE}
+      - LOGFLARE_API_KEY=${LOGFLARE_API_KEY:-stub}
+      - SINGLE_TENANT=true
+      - SUPABASE_MODE=true
+      - LOGFLARE_SUPABASE_MODE=true
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    mem_reservation: 256m
 
   ollama:
     image: ollama/ollama:latest
@@ -176,6 +463,11 @@ services:
     mem_reservation: 6g    # Garantiert 6GB, kann bis zu 20GB+ für große Modelle nutzen
     # Kein mem_limit - kann bei großen Modellen fast allen RAM nutzen
     # Kein cpus-limit - kann alle 6 CPU-Kerne für Inferenz nutzen
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama.rule=Host(`217.154.225.184`) && PathPrefix(`/llm-api`)"
+      - "traefik.http.routers.ollama.tls=false"
+      - "traefik.http.services.ollama.loadbalancer.server.port=11434"
 
   ollama-setup:
     image: ollama/ollama:latest
@@ -261,6 +553,11 @@ services:
     # Flexible Ressourcen
     mem_reservation: 512m
     mem_limit: 2g
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openwebui.rule=Host(`217.154.225.184`) && PathPrefix(`/chat`)"
+      - "traefik.http.routers.openwebui.tls=false"
+      - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
 
   # VPS Dashboard - Hauptübersicht aller Services  
   dashboard:

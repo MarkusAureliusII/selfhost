@@ -14,7 +14,7 @@
 - **N8N**: latest - Workflow automation platform
 - **Ollama**: latest - Local LLM server
 - **Open WebUI**: latest - ChatGPT-like interface
-- **Qdrant**: latest - Vector database
+- **Supabase**: latest - Backend platform with PostgreSQL, APIs, and real-time features
 - **VPS Dashboard**: nginx:alpine - System monitoring
 
 #### 🧠 AI Models Installed
@@ -60,10 +60,10 @@
 - **Protected Services**: Dashboard and N8N require BasicAuth login
   - Credentials: admin/admin123
   - Access via: `http://217.154.225.184/dashboard` and `http://217.154.225.184/n8n`
-- **Public Services**: Open WebUI, Ollama API, and Qdrant remain freely accessible
+- **Public Services**: Open WebUI, Ollama API, and Supabase remain freely accessible
   - Open WebUI: `http://217.154.225.184:3001`
   - Ollama API: `http://217.154.225.184:11434`
-  - Qdrant: `http://217.154.225.184:6333`
+  - Supabase: `http://217.154.225.184:6333`
 
 **Technical Implementation**:
 - Replaced complex Authelia configuration with simpler BasicAuth
@@ -87,7 +87,7 @@
 - VPS Dashboard: http://217.154.225.184:3000 ✅
 - Open WebUI: http://217.154.225.184:3001 ✅
 - N8N Workflows: http://217.154.225.184:5678 ✅
-- Qdrant Vector DB: http://217.154.225.184:6333 ✅
+- Supabase Studio: http://217.154.225.184:6333 ✅
 - Traefik Dashboard: http://217.154.225.184:8080 ✅
 - Ollama API: http://217.154.225.184:11434 ✅
 

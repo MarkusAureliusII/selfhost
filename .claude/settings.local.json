@@ -16,7 +16,8 @@
       "Bash(rm:*)",
       "Bash(curl:*)",
       "Bash(cp:*)",
-      "Bash(sudo file:*)"
+      "Bash(sudo file:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

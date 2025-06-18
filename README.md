@@ -2,7 +2,7 @@
 
 ## 📋 Project Overview
 
-A comprehensive self-hosted AI infrastructure running on a high-performance VPS, featuring workflow automation, large language models, vector databases, and modern DevOps practices. This setup provides a complete AI development and production environment with enterprise-grade reliability.
+A comprehensive self-hosted AI infrastructure running on a high-performance VPS, featuring workflow automation, large language models, Supabase backend, and modern DevOps practices. This setup provides a complete AI development and production environment with enterprise-grade reliability.
 
 ## 🏗️ Project Structure
 
@@ -75,11 +75,11 @@ A comprehensive self-hosted AI infrastructure running on a high-performance VPS,
   - High-performance configuration (200 concurrent workflows)
   - Enhanced payload limits (128MB)
 
-#### **Qdrant** - Vector Database
-- **Image**: `qdrant/qdrant:latest`
-- **Purpose**: Store and search vector embeddings for RAG applications
-- **Access**: http://217.154.225.184:6333
-- **Features**: CORS enabled, optimized for AI/ML workloads
+#### **Supabase** - Complete Backend Platform
+- **Image**: `supabase/supabase-studio:latest`
+- **Purpose**: PostgreSQL backend with real-time APIs, authentication, and storage
+- **Access**: http://217.154.225.184:6333 (Supabase Studio)
+- **Features**: Real-time subscriptions, REST APIs, authentication, vector storage, dashboard UI
 
 ### Supporting Services
 
@@ -101,7 +101,7 @@ A comprehensive self-hosted AI infrastructure running on a high-performance VPS,
 | **VPS Dashboard** | http://217.154.225.184:3000 | System overview and monitoring |
 | **Open WebUI** | http://217.154.225.184:3001 | ChatGPT-like interface (instant access) |
 | **N8N Workflows** | http://217.154.225.184:5678 | Workflow automation platform |
-| **Qdrant Vector DB** | http://217.154.225.184:6333 | Vector database API |
+| **Supabase Studio** | http://217.154.225.184:6333 | Backend platform with database UI |
 | **Traefik Dashboard** | http://217.154.225.184:8080 | Load balancer management |
 | **Ollama API** | http://217.154.225.184:11434 | LLM server API |
 
@@ -270,7 +270,7 @@ ufw allow 80/tcp      # HTTP (redirects to HTTPS)
 ufw allow 443/tcp     # HTTPS
 ufw allow 3000:3001/tcp  # Dashboard & WebUI
 ufw allow 5678/tcp    # N8N
-ufw allow 6333/tcp    # Qdrant
+ufw allow 6333/tcp    # Supabase Studio
 ufw allow 8080/tcp    # Traefik Dashboard
 ufw allow 11434/tcp   # Ollama API
 ufw enable
@@ -292,7 +292,7 @@ ufw enable
 ```bash
 # Recommended volume allocation (360GB total):
 # - Ollama models: 150GB
-# - Qdrant vectors: 100GB  
+# - Supabase data: 100GB  
 # - PostgreSQL data: 50GB
 # - Backups: 30GB
 # - N8N workflows: 20GB
@@ -309,8 +309,8 @@ docker exec selfhost-postgres-1 pg_dump -U n8n_user n8n_db | gzip > backups/post
 # N8N workflows backup
 docker run --rm -v selfhost_n8n_storage:/data -v $(pwd)/backups:/backup alpine tar czf /backup/n8n_$(date +%Y%m%d_%H%M%S).tar.gz /data
 
-# Qdrant vectors backup
-docker run --rm -v selfhost_qdrant_storage:/data -v $(pwd)/backups:/backup alpine tar czf /backup/qdrant_$(date +%Y%m%d_%H%M%S).tar.gz /data
+# Supabase data backup
+docker run --rm -v selfhost_supabase_storage:/data -v $(pwd)/backups:/backup alpine tar czf /backup/supabase_$(date +%Y%m%d_%H%M%S).tar.gz /data
 ```
 
 ### Recovery Procedures
@@ -452,7 +452,7 @@ curl https://ollama.ai/library
 - [Traefik Documentation](https://doc.traefik.io/traefik/)
 - [Ollama Documentation](https://ollama.ai/docs)
 - [N8N Documentation](https://docs.n8n.io/)
-- [Qdrant Documentation](https://qdrant.tech/documentation/)
+- [Supabase Documentation](https://supabase.com/docs)
 
 ### Getting Help
 - Check logs first: `docker logs [service_name]`

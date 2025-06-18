@@ -1,0 +1,107 @@
+{
+  "name": "Supabase AI Stack Connection",
+  "description": "Pre-configured Supabase connection for N8N workflows",
+  "version": "1.0.0",
+  "credentials": {
+    "supabaseApi": {
+      "name": "Supabase API",
+      "displayName": "Supabase API",
+      "properties": {
+        "host": {
+          "displayName": "Supabase URL",
+          "name": "host",
+          "type": "string",
+          "default": "http://supabase-kong:8000",
+          "description": "Your Supabase project URL"
+        },
+        "serviceKey": {
+          "displayName": "Service Role Key",
+          "name": "serviceKey", 
+          "type": "string",
+          "typeOptions": {
+            "password": true
+          },
+          "default": "{{ $env.SUPABASE_SERVICE_ROLE_KEY }}",
+          "description": "Supabase service role key for full database access"
+        }
+      }
+    },
+    "supabaseDatabase": {
+      "name": "Supabase Database",
+      "displayName": "Supabase PostgreSQL",
+      "properties": {
+        "host": {
+          "displayName": "Database Host",
+          "name": "host",
+          "type": "string",
+          "default": "supabase-db",
+          "description": "Database server host"
+        },
+        "port": {
+          "displayName": "Database Port",
+          "name": "port",
+          "type": "number",
+          "default": 5432
+        },
+        "database": {
+          "displayName": "Database Name",
+          "name": "database",
+          "type": "string",
+          "default": "postgres"
+        },
+        "username": {
+          "displayName": "Username",
+          "name": "username",
+          "type": "string",
+          "default": "authenticator",
+          "description": "Database username (authenticator for API access)"
+        },
+        "password": {
+          "displayName": "Password",
+          "name": "password",
+          "type": "string",
+          "typeOptions": {
+            "password": true
+          },
+          "default": "{{ $env.SUPABASE_DB_PASSWORD }}",
+          "description": "Database password"
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "rest_api": "http://supabase-kong:8000/rest/v1/",
+    "auth_api": "http://supabase-kong:8000/auth/v1/",
+    "storage_api": "http://supabase-kong:8000/storage/v1/",
+    "realtime_api": "http://supabase-kong:8000/realtime/v1/",
+    "studio_ui": "http://217.154.225.184:6333"
+  },
+  "tables": {
+    "ai_models": "AI model metadata and configurations",
+    "ai_embeddings": "Vector embeddings for AI applications", 
+    "chat_conversations": "Chat conversation history",
+    "chat_messages": "Individual chat messages",
+    "n8n_workflow_data": "N8N workflow execution data",
+    "webhook_logs": "Webhook call logs and responses"
+  },
+  "example_workflows": {
+    "store_webhook_data": {
+      "description": "Store incoming webhook data in Supabase",
+      "table": "webhook_logs",
+      "method": "POST",
+      "url": "{{ $env.SUPABASE_REST_URL }}/webhook_logs"
+    },
+    "get_ai_models": {
+      "description": "Retrieve available AI models",
+      "table": "ai_models", 
+      "method": "GET",
+      "url": "{{ $env.SUPABASE_REST_URL }}/ai_models"
+    },
+    "store_chat_message": {
+      "description": "Store chat message in conversation",
+      "table": "chat_messages",
+      "method": "POST", 
+      "url": "{{ $env.SUPABASE_REST_URL }}/chat_messages"
+    }
+  }
+}

@@ -8,7 +8,7 @@ Professional self-hosted AI infrastructure running on a high-performance VPS (De
 - **N8N**: Workflow automation platform with PostgreSQL backend
 - **Ollama**: Local LLM server with 12+ models (llama3.1:70b, codellama:34b, mixtral:8x7b, etc.)
 - **Open WebUI**: German ChatGPT-like interface for Ollama models
-- **Qdrant**: Vector database for AI/ML embeddings
+- **Supabase**: Complete backend platform with PostgreSQL, real-time APIs, authentication, and vector capabilities
 - **PostgreSQL**: Primary database for N8N
 - **Dashboard**: Custom VPS overview with API keys section
 
@@ -16,7 +16,7 @@ Professional self-hosted AI infrastructure running on a high-performance VPS (De
 - VPS Dashboard: http://217.154.225.184:3000 (main overview)
 - Open WebUI: http://217.154.225.184:3001 (ChatGPT interface - instant access)
 - N8N: http://217.154.225.184:5678 (workflow automation)
-- Qdrant: http://217.154.225.184:6333 (vector database)
+- Supabase Studio: http://217.154.225.184:6333 (backend platform with database UI)
 - Traefik Dashboard: http://217.154.225.184:8080 (load balancer)
 - Ollama API: http://217.154.225.184:11434 (LLM server)
 
@@ -125,7 +125,7 @@ High-performance setup with flexible memory allocation:
 - **Ollama**: 6GB reserved, can use up to 20GB for large models
 - **N8N**: 1GB reserved, can expand for complex workflows
 - **PostgreSQL**: 2GB reserved, 8GB limit with performance tuning
-- **Qdrant**: 1GB reserved, can expand for large vector operations
+- **Supabase**: 1GB reserved, can expand for complex backend operations including vector storage and real-time features
 
 ## Development Notes
 - Uses flexible memory reservations instead of hard limits

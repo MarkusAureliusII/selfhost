@@ -655,24 +655,24 @@ $user = getCurrentUser();
                     </div>
                 </div>
 
-                <!-- Qdrant Vector Database -->
+                <!-- Supabase Database Platform -->
                 <div class="service-card" onclick="openService('http://217.154.225.184:6333')">
                     <div class="service-header">
                         <div class="service-info">
                             <div class="service-icon">🗄️</div>
-                            <h3 class="service-title">Qdrant Vector DB</h3>
-                            <p class="service-description">High-performance vector database for similarity search and recommendations. Perfect for RAG applications.</p>
+                            <h3 class="service-title">Supabase Studio</h3>
+                            <p class="service-description">Open-source Firebase alternative with PostgreSQL, real-time subscriptions, and instant APIs. Complete backend platform.</p>
                         </div>
                         <div class="service-status">
                             <span class="status-badge online">Online</span>
                         </div>
                     </div>
                     <div class="service-actions">
-                        <a href="http://217.154.225.184:6333/dashboard" class="btn btn-primary" target="_blank">
-                            📊 Dashboard
+                        <a href="http://217.154.225.184:6333" class="btn btn-primary" target="_blank">
+                            🎛️ Studio
                         </a>
-                        <a href="http://217.154.225.184:6333/collections" class="btn btn-secondary" target="_blank">
-                            📚 Collections
+                        <a href="http://217.154.225.184:8000/rest/v1/" class="btn btn-secondary" target="_blank">
+                            🔌 API
                         </a>
                     </div>
                 </div>
@@ -833,7 +833,7 @@ $user = getCurrentUser();
             const logData = {
                 timestamp: new Date().toISOString(),
                 user: '<?php echo $user['username']; ?>',
-                services: ['Open WebUI', 'N8N', 'Ollama', 'Qdrant', 'Traefik'],
+                services: ['Open WebUI', 'N8N', 'Ollama', 'Supabase', 'Traefik'],
                 status: 'All systems operational',
                 performance: {
                     cpu: document.getElementById('cpu-usage').textContent,

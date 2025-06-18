@@ -21,7 +21,7 @@
 | **PostgreSQL** | ✅ Running | Healthy | ~100MB | Database backend |
 | **Ollama** | ✅ Running | Healthy | ~2GB | AI model server |
 | **N8N** | ✅ Running | Initializing | ~200MB | Workflow automation |
-| **Qdrant** | ✅ Running | Ready | ~50MB | Vector database |
+| **Supabase** | ✅ Running | Ready | ~50MB | Backend platform with PostgreSQL, APIs |
 | **Open WebUI** | ✅ Running | Healthy | ~100MB | AI chat interface |
 | **Traefik** | ✅ Running | Active | ~20MB | Reverse proxy |
 | **Dashboard** | ✅ Running | Ready | ~10MB | System monitoring |
@@ -50,14 +50,14 @@
 - **VPS Dashboard**: http://217.154.225.184:3000
 - **AI Chat Interface**: http://217.154.225.184:3001
 - **Workflow Builder**: http://217.154.225.184:5678
-- **Vector Database**: http://217.154.225.184:6333
+- **Supabase Studio**: http://217.154.225.184:6333
 - **Load Balancer**: http://217.154.225.184:8080
 - **AI API**: http://217.154.225.184:11434
 
 ### API Endpoints
 - **Ollama Models**: `GET http://217.154.225.184:11434/api/tags`
 - **Generate Text**: `POST http://217.154.225.184:11434/api/generate`
-- **Vector Search**: `GET http://217.154.225.184:6333/collections`
+- **Supabase REST API**: `GET http://217.154.225.184:6333/rest/v1/`
 - **N8N Webhooks**: Available after workflow creation
 
 ## 📁 Professional File Structure

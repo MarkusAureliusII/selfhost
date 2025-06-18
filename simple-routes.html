@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stack - Benutzerfreundliche URLs</title>
+    <style>
+        :root {
+            --primary-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-color: #3b82f6;
+            --border-primary: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .service-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent-color);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .service-url {
+            background: var(--primary-bg);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-primary);
+        }
+
+        .service-ports {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .port-link {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .port-link:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .info-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .info-section h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .info-section p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Stack - Benutzerfreundliche URLs</h1>
+            <p>Einfacher Zugriff auf alle AI-Services über beschreibende Namen</p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card" onclick="window.open('http://217.154.225.184:5678', '_blank')">
+                <div class="service-icon">🔄</div>
+                <div class="service-title">Automation</div>
+                <div class="service-description">N8N Workflow-Automatisierung</div>
+                <div class="service-url">http://217.154.225.184/automation</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:5678" class="port-link" target="_blank">Port 5678</a>
+                </div>
+            </div>
+
+            <div class="service-card" onclick="window.open('http://217.154.225.184:3001', '_blank')">
+                <div class="service-icon">💬</div>
+                <div class="service-title">Chat</div>
+                <div class="service-description">Open WebUI - ChatGPT-Interface</div>
+                <div class="service-url">http://217.154.225.184/chat</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:3001" class="port-link" target="_blank">Port 3001</a>
+                </div>
+            </div>
+
+            <div class="service-card" onclick="window.open('http://217.154.225.184:6333', '_blank')">
+                <div class="service-icon">🗄️</div>
+                <div class="service-title">Database</div>
+                <div class="service-description">Supabase Studio - Backend Platform</div>
+                <div class="service-url">http://217.154.225.184/database</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:6333" class="port-link" target="_blank">Port 6333</a>
+                </div>
+            </div>
+
+            <div class="service-card" onclick="window.open('http://217.154.225.184:11434', '_blank')">
+                <div class="service-icon">🤖</div>
+                <div class="service-title">LLM API</div>
+                <div class="service-description">Ollama - AI Model Server</div>
+                <div class="service-url">http://217.154.225.184/llm-api</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:11434" class="port-link" target="_blank">Port 11434</a>
+                </div>
+            </div>
+
+            <div class="service-card" onclick="window.open('http://217.154.225.184:3000', '_blank')">
+                <div class="service-icon">📊</div>
+                <div class="service-title">Dashboard</div>
+                <div class="service-description">VPS Monitoring & Übersicht</div>
+                <div class="service-url">http://217.154.225.184/dashboard</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:3000" class="port-link" target="_blank">Port 3000</a>
+                </div>
+            </div>
+
+            <div class="service-card" onclick="window.open('http://217.154.225.184:8080', '_blank')">
+                <div class="service-icon">🔀</div>
+                <div class="service-title">Proxy</div>
+                <div class="service-description">Traefik - Load Balancer</div>
+                <div class="service-url">http://217.154.225.184/proxy</div>
+                <div class="service-ports">
+                    <a href="http://217.154.225.184:8080" class="port-link" target="_blank">Port 8080</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>💡 Hinweis</h3>
+            <p>
+                Die benutzerfreundlichen URLs werden über Traefik geleitet und sind in Arbeit. 
+                Bis dahin verwende bitte die direkten Port-Links für den Zugriff auf die Services.
+                Alle Services sind voll funktionsfähig und über ihre Standard-Ports erreichbar.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode als Standard
+        document.documentElement.setAttribute('data-theme', 'dark');
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '1':
+                        e.preventDefault();
+                        window.open('http://217.154.225.184:5678', '_blank');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        window.open('http://217.154.225.184:3001', '_blank');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        window.open('http://217.154.225.184:6333', '_blank');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        window.open('http://217.154.225.184:11434', '_blank');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        window.open('http://217.154.225.184:3000', '_blank');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
