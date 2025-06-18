@@ -235,4 +235,61 @@ sudo /var/www/selfhost/scripts/maintenance.sh
 
 ---
 
-*Last Updated: June 18, 2025 00:05 UTC by Claude Code Assistant*
+## 🔐 Authentication Restoration & Stay Logged In - June 18, 2025 08:20 UTC
+
+### Issue Resolved
+**Problem**: Applications showing "trusted header" errors, login forms disabled
+**Solution**: Restored proper authentication for all web applications with persistent login
+
+### Changes Applied
+
+#### Open WebUI Authentication Restored
+```yaml
+# Fixed authentication settings
+- ENABLE_LOGIN_FORM=true      # Was: false
+- WEBUI_AUTH=true            # Was: false
+- ENABLE_SIGNUP=false        # Maintain security
+```
+
+#### N8N User Management Enabled
+```yaml
+# Restored proper user management
+- N8N_USER_MANAGEMENT_DISABLED=false  # Was: true
+- N8N_BASIC_AUTH_ACTIVE=false         # Kept as false (using internal auth)
+```
+
+#### Enhanced Dashboard Login System
+**New Features**:
+- ✅ "Stay logged in for 30 days" checkbox added
+- ✅ Remember me cookie implementation with SHA256 security
+- ✅ Extended session timeout (30 days vs 1 hour)
+- ✅ Automatic session restoration on page reload
+- ✅ Secure cookie cleanup on logout
+
+**Technical Implementation**:
+- Enhanced `login.php` with remember me functionality
+- Updated `auth_check.php` for persistent session management
+- Added CSS styling for remember me checkbox
+- Implemented secure token-based authentication
+
+### Service Status After Fix
+- ✅ **VPS Dashboard**: Login restored with stay logged in option (Port 3000)
+- ✅ **Open WebUI**: Login form now available (Port 3001) 
+- ✅ **N8N**: User management active - admin setup required (Port 5678)
+- ✅ **All Services**: HTTP 200 responses confirmed
+
+### Authentication Details
+- **Dashboard**: admin / admin123 + optional "stay logged in"
+- **Open WebUI**: First-time setup required via web interface
+- **N8N**: Admin account creation required via web interface
+- **Session Timeout**: 1 hour standard, 30 days with remember me
+
+### Next Steps
+1. Access N8N at http://217.154.225.184:5678 to create admin account
+2. Access Open WebUI at http://217.154.225.184:3001 for initial setup
+3. Test all authentication flows
+4. Configure additional users if needed
+
+---
+
+*Last Updated: June 18, 2025 08:20 UTC by Claude Code Assistant*

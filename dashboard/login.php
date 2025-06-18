@@ -4,12 +4,28 @@ session_start();
 // Simple authentication - in production, use proper password hashing
 const ADMIN_USERNAME = 'admin';
 const ADMIN_PASSWORD = 'admin123';
-const SESSION_TIMEOUT = 3600; // 1 hour
+const SESSION_TIMEOUT = 3600; // 1 hour default
+const REMEMBER_ME_TIMEOUT = 86400 * 30; // 30 days
+
+// Check for remember me cookie
+if (!isset($_SESSION['authenticated']) && isset($_COOKIE['remember_me'])) {
+    $remember_token = $_COOKIE['remember_me'];
+    if ($remember_token === hash('sha256', ADMIN_USERNAME . 'remember_token')) {
+        $_SESSION['authenticated'] = true;
+        $_SESSION['username'] = ADMIN_USERNAME;
+        $_SESSION['login_time'] = time();
+        $_SESSION['last_activity'] = time();
+        $_SESSION['remember_me'] = true;
+    }
+}
 
 // Check if already logged in
 if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
+    // Use extended timeout for remember me sessions
+    $timeout = isset($_SESSION['remember_me']) ? REMEMBER_ME_TIMEOUT : SESSION_TIMEOUT;
+    
     // Check session timeout
-    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) < SESSION_TIMEOUT) {
+    if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) < $timeout) {
         $_SESSION['last_activity'] = time();
         header('Location: index.php');
         exit;
@@ -17,6 +33,10 @@ if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
         // Session expired
         session_destroy();
         session_start();
+        // Clear remember me cookie if session expired
+        if (isset($_COOKIE['remember_me'])) {
+            setcookie('remember_me', '', time() - 3600, '/');
+        }
     }
 }
 
@@ -26,12 +46,20 @@ $error_message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
+    $remember_me = isset($_POST['remember_me']);
     
     if ($username === ADMIN_USERNAME && $password === ADMIN_PASSWORD) {
         $_SESSION['authenticated'] = true;
         $_SESSION['username'] = $username;
         $_SESSION['login_time'] = time();
         $_SESSION['last_activity'] = time();
+        
+        // Handle remember me functionality
+        if ($remember_me) {
+            $_SESSION['remember_me'] = true;
+            $remember_token = hash('sha256', $username . 'remember_token');
+            setcookie('remember_me', $remember_token, time() + REMEMBER_ME_TIMEOUT, '/');
+        }
         
         // Redirect to dashboard
         header('Location: index.php');
@@ -250,6 +278,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: var(--text-primary);
         }
 
+        .remember-me-container {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .remember-me-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 0.75rem;
+            border: 2px solid var(--border-primary);
+            border-radius: 4px;
+            background-color: var(--secondary-bg);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .remember-me-checkbox:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .remember-me-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .remember-me-text {
+            cursor: pointer;
+        }
+
         .info-section {
             text-align: center;
             padding-top: 1.5rem;
@@ -335,6 +404,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     placeholder="Enter your password"
                     required
                 >
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label class="remember-me-container">
+                    <input type="checkbox" name="remember_me" id="remember_me" class="remember-me-checkbox">
+                    <span class="remember-me-text">Stay logged in for 30 days</span>
+                </label>
             </div>
 
             <button type="submit" class="login-button">
