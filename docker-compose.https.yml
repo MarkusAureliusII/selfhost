@@ -219,23 +219,12 @@ services:
       - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-secret-key-change-me}
       - DEFAULT_LOCALE=en-US
       - DEFAULT_MODELS=llama3.2:3b,mistral:7b,codellama:13b
-      - ENABLE_SIGNUP=false
+      - ENABLE_SIGNUP=true
       - ENABLE_LOGIN_FORM=true
-      - ENABLE_WEB_SEARCH=false
-      - ENABLE_LOCAL_WEB_FETCH=true
-      - WEBUI_AUTH=true
+      - WEBUI_AUTH=false
       - WEBUI_NAME="AI Chat"
       - WEBUI_URL=http://217.154.225.184:3001
-      - ENABLE_ADMIN_EXPORT=false
-      - ENABLE_ADMIN_CHAT_ACCESS=false
-      - ENABLE_COMMUNITY_SHARING=false
-      - SHOW_ADMIN_DETAILS=false
-      - ENABLE_MODEL_FILTER=false
-      - ENABLE_API_KEY=false
-      - WEBUI_AUTH_TRUSTED_EMAIL_HEADER=""
       - DEFAULT_USER_ROLE=admin
-      - ENABLE_OAUTH_SIGNUP=false
-      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=false
     volumes:
       - open_webui_data:/app/backend/data
     depends_on:
